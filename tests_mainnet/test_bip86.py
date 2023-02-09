@@ -17,7 +17,7 @@ def test_bip86(client: Client, speculos_globals: SpeculosGlobals):
         name="",
         descriptor_template="tr(@0/**)",
         keys_info=[
-            f"[{fpr}/86'/57'/0']xpub6BgBgsespWvERF3LHQu6CnqdvfEvtMcQjYrcRzx53QJjSxarj2afYWcLteoGVky7D3UKDP9QyrLprQ3VCECoY49yfdDEHGCtMMj92pReUsQ",
+            f"[{fpr}/86'/0'/0']xpub6BgBgsespWvERF3LHQu6CnqdvfEvtMcQjYrcRzx53QJjSxarj2afYWcLteoGVky7D3UKDP9QyrLprQ3VCECoY49yfdDEHGCtMMj92pReUsQ",
         ],
     )
 
