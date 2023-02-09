@@ -79,6 +79,9 @@ class SpeculosGlobals:
         self.master_extended_pubkey = bip32.get_xpub()
         self.master_key_fingerprint = hash160(bip32.pubkey)[0:4]
         self.master_compressed_pubkey = bip32.pubkey.hex()
+        print(self.master_key_fingerprint)
+        print(self.master_extended_privkey)
+        print(self.master_extended_pubkey)
         slip21_root = Slip21Node.from_seed(self.seed)
         self.wallet_registration_key = slip21_root.derive_child(
             WALLET_POLICY_SLIP21_LABEL).key

@@ -17,7 +17,6 @@ tests/.test_bitcoin
 # Fuzzing
 fuzzing/build/
 
-
 # Editors
 .idea/
 .vscode/c_cpp_properties.json
@@ -33,3 +32,6 @@ __pycache__/
 # Doxygen
 doc/html
 doc/latex
+
+syscoin-bin
+syscoin-testnet-bin

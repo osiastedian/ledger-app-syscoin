@@ -1,7 +1,7 @@
 {
   "name": "ledger-bitcoin",
   "version": "0.0.1",
-  "description": "Ledger Hardware Wallet Bitcoin Application Client",
+  "description": "Ledger Hardware Wallet Syscoin Application Client",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
   "repository": "https://github.com/LedgerHW/app-bitcoin-new",
@@ -10,7 +10,7 @@
     "Ledger",
     "LedgerWallet",
     "btc",
-    "Bitcoin",
+    "Syscoin",
     "NanoS",
     "NanoX",
     "Hardware Wallet"

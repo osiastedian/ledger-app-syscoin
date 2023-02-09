@@ -34,6 +34,10 @@ static unsigned char const BSM_SIGN_MAGIC[] = {'\x18', 'B', 'i', 't', 'c', 'o', 
                                                'S',    'i', 'g', 'n', 'e', 'd', ' ', 'M', 'e',
                                                's',    's', 'a', 'g', 'e', ':', '\n'};
 
+static unsigned char const SYSM_SIGN_MAGIC[] = {'\x18', 'S', 'y', 's', 'c', 'o', 'i', 'n', ' ',
+                                               'S',    'i', 'g', 'n', 'e', 'd', ' ', 'M', 'e',
+                                               's',    's', 'a', 'g', 'e', ':', '\n'};
+
 void handler_sign_message(dispatcher_context_t *dc, uint8_t p2) {
     (void) p2;
 
@@ -71,6 +75,7 @@ void handler_sign_message(dispatcher_context_t *dc, uint8_t p2) {
     cx_sha256_init(&msg_hash_context);
     cx_sha256_init(&bsm_digest_context);
 
+    // TODO: change to SYSM_SIGN_MAGIC on mainnet or testnet
     crypto_hash_update(&bsm_digest_context.header, BSM_SIGN_MAGIC, sizeof(BSM_SIGN_MAGIC));
     crypto_hash_update_varint(&bsm_digest_context.header, message_length);
 

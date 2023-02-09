@@ -20,5 +20,5 @@ def test_dashboard(comm: SpeculosClient, is_speculos: bool, app_version: str):
     comm.wait_for_text_event("Quit")
 
     comm.press_and_release("right")
-    comm.wait_for_text_event("Bitcoin")
+    comm.wait_for_text_event("Syscoin")
     comm.wait_for_text_event("is ready")

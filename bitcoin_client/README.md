@@ -1,8 +1,8 @@
-# Ledger Bitcoin application client
+# Ledger Syscoin application client
 
 ## Overview
 
-Client library for Ledger Bitcoin application.
+Client library for Ledger Syscoin application.
 
 Main repository and documentation: https://github.com/LedgerHQ/app-bitcoin-new
 
@@ -35,12 +35,12 @@ It is possible to run the app and the library with the [speculos](https://github
 ⚠️ Currently, speculos does not correctly emulate the version of the app, always returning a dummy value; in order to use the library, it is necessary to set the `SPECULOS_APPNAME` environment variable before starting speculos, for example with:
 
 ```
-$ export SPECULOS_APPNAME="Bitcoin Test:2.1.0"
+$ export SPECULOS_APPNAME="Syscoin Test:2.1.0"
 ```
 
 Similarly, to test the library behavior on a legacy version of the app, one can set the version to `1.6.5` (the final version of the 1.X series).
 
-The expected application name is `Bitcoin` for mainnet, `Bitcoin Test` for testnet.
+The expected application name is `Syscoin` for mainnet, `Syscoin Test` for testnet.
 
 ### Example
 
@@ -49,7 +49,6 @@ The following example showcases all the main methods of the `Client`'s interface
 If you are not using the context manager syntax when creating the client, remember to call the `stop()` method to release the communication channel.
 
 Testing the `sign_psbt` method requires producing a valid PSBT (with any external tool that supports either PSBTv0 or PSBTv2), and provide the corresponding wallet policy; it is skipped by default in the following example.
-
 
 ```python
 from typing import Optional

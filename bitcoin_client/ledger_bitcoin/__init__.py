@@ -1,5 +1,5 @@
 
-"""Ledger Nano Bitcoin app client"""
+"""Ledger Nano Syscoin app client"""
 
 from .client_base import Client, TransportClient, PartialSignature
 from .client import createClient

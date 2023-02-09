@@ -1,5 +1,5 @@
 /*****************************************************************************
- *   Ledger App Bitcoin.
+ *   Ledger App Syscoin.
  *   (c) 2021 Ledger SAS.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,12 +21,13 @@
 #include "../globals.h"
 #include "menu.h"
 
-// We have a screen with the icon and "Bitcoin is ready" for Bitcoin,
-// "Bitcoin Testnet is ready" for Bitcoin Testnet.
-UX_STEP_NOCB(ux_menu_ready_step_bitcoin, pnn, {&C_bitcoin_logo, "Bitcoin", "is ready"});
-UX_STEP_NOCB(ux_menu_ready_step_bitcoin_testnet,
+// We have a screen with the icon and "Syscoin is ready" for Syscoin,
+// "Syscoin Testnet is ready" for Syscoin Testnet.
+// TODO: Change to SYSCOIN Logo
+UX_STEP_NOCB(ux_menu_ready_step_bitcoin, pnn, {&C_bitcoin_logo, "Syscoin", "is ready"});
+UX_STEP_NOCB(ux_menu_ready_step_syscoin_regtest,
              pnn,
-             {&C_bitcoin_logo, "Bitcoin Testnet", "is ready"});
+             {&C_bitcoin_logo, "Syscoin Testnet", "is ready"});
 
 UX_STEP_NOCB(ux_menu_version_step, bn, {"Version", APPVERSION});
 UX_STEP_CB(ux_menu_about_step, pb, ui_menu_about(), {&C_icon_certificate, "About"});
@@ -49,8 +50,8 @@ UX_FLOW(ux_menu_main_flow_bitcoin,
 // #2 screen: version of the app
 // #3 screen: about submenu
 // #4 screen: quit
-UX_FLOW(ux_menu_main_flow_bitcoin_testnet,
-        &ux_menu_ready_step_bitcoin_testnet,
+UX_FLOW(ux_menu_main_flow_syscoin_regtest,
+        &ux_menu_ready_step_syscoin_regtest,
         &ux_menu_version_step,
         &ux_menu_about_step,
         &ux_menu_exit_step,
@@ -67,11 +68,11 @@ void ui_menu_main() {
     if (BIP32_PUBKEY_VERSION == BIP32_PUBKEY_VERSION_MAINNET) {  // mainnet
         ux_flow_init(0, ux_menu_main_flow_bitcoin, NULL);
     } else if (BIP32_PUBKEY_VERSION == BIP32_PUBKEY_VERSION_TESTNET) {  // testnet
-        ux_flow_init(0, ux_menu_main_flow_bitcoin_testnet, NULL);
+        ux_flow_init(0, ux_menu_main_flow_syscoin_regtest, NULL);
     }
 }
 
-UX_STEP_NOCB(ux_menu_info_step, bn, {"Bitcoin App", "(c) 2022 Ledger"});
+UX_STEP_NOCB(ux_menu_info_step, bn, {"Syscoin App", "(c) 2023 Ledger"});
 UX_STEP_CB(ux_menu_back_step, pb, ui_menu_main(), {&C_icon_back, "Back"});
 
 // FLOW for the about submenu:

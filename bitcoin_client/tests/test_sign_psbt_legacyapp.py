@@ -9,7 +9,7 @@ from test_utils import has_automation
 tests_root: Path = Path(__file__).parent
 
 
-CURRENCY_TICKER = "TEST"
+CURRENCY_TICKER = "TB"
 
 
 def open_psbt_from_file(filename: str) -> PSBT:

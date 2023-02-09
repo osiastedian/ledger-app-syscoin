@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
   push:
     branches:
-    - master
-    - develop
+      - master
+      - develop
   pull_request:
     branches:
-    - master
-    - develop
+      - master
+      - develop
 
 jobs:
   job_build:
@@ -36,20 +36,20 @@ jobs:
 
       - name: Build
         run: |
-          make DEBUG=0 COIN=bitcoin BOLOS_SDK=${{ matrix.SDK }} && mv bin/ bitcoin-bin/
+          make DEBUG=0 COIN=syscoin BOLOS_SDK=${{ matrix.SDK }} && mv bin/ syscoin-bin/
           make clean
-          make DEBUG=0 COIN=bitcoin_testnet BOLOS_SDK=${{ matrix.SDK }} && mv bin/ bitcoin-testnet-bin/
-      - name: Upload Bitcoin app binary
+          make DEBUG=0 COIN=syscoin_regtest BOLOS_SDK=${{ matrix.SDK }} && mv bin/ syscoin-testnet-bin/
+      - name: Upload Syscoin app binary
         uses: actions/upload-artifact@v2
         with:
-          name: bitcoin-app-${{ matrix.model }}
-          path: bitcoin-bin
+          name: syscoin-app-${{ matrix.model }}
+          path: syscoin-bin
 
-      - name: Upload Bitcoin Testnet app binary
+      - name: Upload Syscoin Testnet app binary
         uses: actions/upload-artifact@v2
         with:
-          name: bitcoin-testnet-app-${{ matrix.model }}
-          path: bitcoin-testnet-bin
+          name: syscoin-testnet-app-${{ matrix.model }}
+          path: syscoin-testnet-bin
 
   job_unit_test:
     name: Unit test
@@ -86,10 +86,10 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./unit-tests/coverage.info
           flags: unittests
-          name: codecov-app-bitcoin
+          name: codecov-app-syscoin
           fail_ci_if_error: true
           verbose: true
-      
+
       - name: HTML documentation
         run: doxygen .doxygen/Doxyfile
 
@@ -111,7 +111,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: ghcr.io/ledgerhq/app-bitcoin-new/speculos-bitcoin-custom:latest
+      image: ghcr.io/osiastedian/ledger-app-syscoin/speculos-syscoin:latest
       ports:
         - 1234:1234
         - 9999:9999
@@ -125,10 +125,10 @@ jobs:
       - name: Clone
         uses: actions/checkout@v2
 
-      - name: Download Bitcoin Testnet app binary
+      - name: Download Syscoin Testnet app binary
         uses: actions/download-artifact@v2
         with:
-          name: bitcoin-testnet-app-${{matrix.model}}
+          name: syscoin-testnet-app-${{matrix.model}}
           path: bin
 
       - name: Run tests
@@ -150,7 +150,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: ghcr.io/ledgerhq/app-bitcoin-new/speculos-bitcoin-custom:latest
+      image: ghcr.io/osiastedian/ledger-app-syscoin/speculos-syscoin:latest
       ports:
         - 1234:1234
         - 9999:9999
@@ -164,10 +164,10 @@ jobs:
       - name: Clone
         uses: actions/checkout@v2
 
-      - name: Download Bitcoin app binary
+      - name: Download Syscoin app binary
         uses: actions/download-artifact@v2
         with:
-          name: bitcoin-app-${{matrix.model}}
+          name: syscoin-app-${{matrix.model}}
           path: bin
 
       - name: Run tests
@@ -177,12 +177,12 @@ jobs:
           PYTHONPATH=$PYTHONPATH:/speculos pytest --headless --model=${{ matrix.model }}
 
   job_test_python_lib_legacyapp:
-    name: Tests with the Python library and legacy Bitcoin app
+    name: Tests with the Python library and legacy Syscoin app
     needs: job_build
     runs-on: ubuntu-latest
 
     container:
-      image: ghcr.io/ledgerhq/app-bitcoin-new/speculos-bitcoin-custom:latest
+      image: ghcr.io/osiastedian/ledger-app-syscoin/speculos-syscoin:latest
       ports:
         - 1234:1234
         - 9999:9999
@@ -202,14 +202,13 @@ jobs:
           pip install -r requirements.txt
           PYTHONPATH=$PYTHONPATH:/speculos pytest --headless
 
-
   job_test_js_lib:
     name: Tests with the JS library
     needs: job_build
     runs-on: ubuntu-latest
 
     container:
-      image: ghcr.io/ledgerhq/app-bitcoin-new/speculos-bitcoin-custom:latest
+      image: ghcr.io/osiastedian/ledger-app-syscoin/speculos-syscoin:latest
       ports:
         - 1234:1234
         - 9999:9999
@@ -226,16 +225,16 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v2
         with:
-          node-version: '16'
+          node-version: "16"
 
       - name: Install yarn
         run: |
           npm install -g yarn
 
-      - name: Download Bitcoin Testnet app binary
+      - name: Download Syscoin Testnet app binary
         uses: actions/download-artifact@v2
         with:
-          name: bitcoin-testnet-app-nanos
+          name: syscoin-testnet-app-nanos
           path: bin
 
       - name: Run tests
@@ -243,7 +242,6 @@ jobs:
           cd bitcoin_client_js
           yarn install
           LOG_SPECULOS=1 LOG_APDUS=1 SPECULOS="/speculos/speculos.py" yarn test
-
 
   job_test_rust_client:
     name: Tests for rust client library

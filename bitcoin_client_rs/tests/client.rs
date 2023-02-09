@@ -17,7 +17,7 @@ fn test_cases(path: &str) -> Vec<serde_json::Value> {
 async fn test_get_version() {
     let exchanges: Vec<String> = vec![
         "=> b001000000".into(),
-        "<= 010c426974636f696e205465737405322e312e3001009000".into(),
+        "<= 010c537973636f696e205465737405322e312e3001009000".into(),
     ];
 
     let store = utils::RecordStore::new(&exchanges);
@@ -26,7 +26,7 @@ async fn test_get_version() {
             .get_version()
             .unwrap();
 
-    assert_eq!(name, "Bitcoin Test".to_string());
+    assert_eq!(name, "Syscoin Test".to_string());
     assert_eq!(version, "2.1.0".to_string());
     assert_eq!(flags, vec![0x00]);
 
@@ -36,7 +36,7 @@ async fn test_get_version() {
             .await
             .unwrap();
 
-    assert_eq!(name, "Bitcoin Test".to_string());
+    assert_eq!(name, "Syscoin Test".to_string());
     assert_eq!(version, "2.1.0".to_string());
     assert_eq!(flags, vec![0x00]);
 }

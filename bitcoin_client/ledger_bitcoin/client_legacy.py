@@ -1,5 +1,5 @@
 """
-This module provides a compatibility layer between the python client of the Ledger Nano Bitcoin app v2 and the v1.6.5,
+This module provides a compatibility layer between the python client of the Ledger Nano Syscoin app v2 and the v1.6.5,
 by translating client requests to the API of the app v1.6.5.
 
 The bulk of the code is taken from bitcoin-core/HWI, with the necessary adaptations.
@@ -70,15 +70,15 @@ class DongleAdaptor:
         return bytearray(self.comm_client.apdu_exchange(cla, ins, data, p1, p2))
 
 class LegacyClient(Client):
-    """Wrapper for Ledger Bitcoin app before version 2.0.0."""
+    """Wrapper for Ledger Syscoin app before version 2.0.0."""
 
     def __init__(self, comm_client: TransportClient, chain: Chain = Chain.MAIN, debug: bool = False):
         super().__init__(comm_client, chain, debug)
 
         self.app = btchip(DongleAdaptor(comm_client))
 
-        if self.app.getAppName() not in ["Bitcoin", "Bitcoin Legacy", "Bitcoin Test", "Bitcoin Test Legacy", "app"]:
-            raise ValueError("Ledger is not in either the Bitcoin or Bitcoin Testnet app")
+        if self.app.getAppName() not in ["Syscoin", "Syscoin Legacy", "Syscoin Test", "Syscoin Test Legacy", "app"]:
+            raise ValueError("Ledger is not in either the Syscoin or Syscoin Testnet app")
 
     def get_extended_pubkey(self, path: str, display: bool = False) -> str:
         # mostly taken from HWI

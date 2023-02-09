@@ -15,16 +15,17 @@ jobs:
       packages: write
 
     steps:
-    - name: Clone
-      uses: actions/checkout@v2
+      - name: Clone
+        uses: actions/checkout@v2
 
-    - name: Build and push speculos-bitcoin to GitHub Packages
-      uses: docker/build-push-action@v1
-      with:
-        dockerfile: .github/workflows/Dockerfile
-        repository: ledgerhq/app-bitcoin-new/speculos-bitcoin
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-        tag_with_sha: true
-        tags: latest
+      - name: Build and push speculos-syscoin to GitHub Packages
+        uses: docker/build-push-action@v1
+        with:
+          dockerfile: .github/workflows/Dockerfile
+          repository: osiastedian/ledger-app-syscoin/speculos-syscoin
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          tag_with_sha: true
+          tags: latest
+          build_args: TARGETPLATFORM=linux/amd64

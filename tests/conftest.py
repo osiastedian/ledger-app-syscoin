@@ -17,22 +17,23 @@ random.seed(0)  # make sure tests are repeatable
 
 # Make sure that the native client library is used with, as speculos would otherwise
 # return a version number < 2.0.0 for the app
-os.environ['SPECULOS_APPNAME'] = f'Bitcoin Test:{get_app_version()}'
+os.environ['SPECULOS_APPNAME'] = f'Syscoin Test:{get_app_version()}'
 
 
-BITCOIN_DIRNAME = os.getenv("BITCOIN_DIRNAME", ".test_bitcoin")
+BITCOIN_DIRNAME = os.getenv("SYSCOIN_DATA", ".test_syscoin")
 
 
 rpc_url = "http://%s:%s@%s:%s" % (
     os.getenv("BTC_RPC_USER", "user"),
     os.getenv("BTC_RPC_PASSWORD", "passwd"),
     os.getenv("BTC_RPC_HOST", "127.0.0.1"),
-    os.getenv("BTC_RPC_PORT", "18443")
+    os.getenv("BTC_RPC_PORT", "38370") # Syscoin RegTest Port
 )
 
 utxos = list()
 btc_addr = ""
 
+print(rpc_url);
 
 def get_rpc() -> AuthServiceProxy:
     return AuthServiceProxy(rpc_url)
@@ -68,9 +69,11 @@ def run_bitcoind():
     # Run bitcoind in a separate folder
     os.makedirs(BITCOIN_DIRNAME, exist_ok=True)
 
-    bitcoind = os.getenv("BITCOIND", "bitcoind")
+    bitcoind = os.getenv("SYSCOIND", "syscoind")
 
-    shutil.copy(os.path.join(os.path.dirname(__file__), "bitcoin.conf"), BITCOIN_DIRNAME)
+    print('Running SYSCOIND', bitcoind)
+
+    shutil.copy(os.path.join(os.path.dirname(__file__), "syscoin.conf"), BITCOIN_DIRNAME)
     subprocess.Popen([bitcoind, f"--datadir={BITCOIN_DIRNAME}"])
 
     # Make sure the node is ready, and generate some initial blocks

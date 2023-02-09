@@ -122,7 +122,7 @@ def comm(settings, root_directory, hid, headless, model, app_version: str) -> Un
 
         app_lib_binary = os.getenv("BITCOIN_APP_LIB_BINARY", None)
         if app_lib_binary:
-            lib_params = ['-l', f"Bitcoin:{app_lib_binary}"]
+            lib_params = ['-l', f"Syscoin:{app_lib_binary}"]
 
         else:
             lib_params = []

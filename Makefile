@@ -1,5 +1,5 @@
 # ****************************************************************************
-#    Ledger App for Bitcoin
+#    Ledger App for Syscoin
 #    (c) 2021 Ledger SAS.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,15 +36,15 @@ APP_STACK_SIZE = 3072
 
 # simplify for tests
 ifndef COIN
-COIN=bitcoin_testnet
+COIN=syscoin_regtest
 endif
 
 # Flags: BOLOS_SETTINGS, GLOBAL_PIN, DERIVE_MASTER
 APP_LOAD_FLAGS=--appFlags 0xa50
 
-ifeq ($(COIN),bitcoin_testnet)
+ifeq ($(COIN),syscoin_regtest)
 
-# Bitcoin testnet, no legacy support
+# Syscoin testnet, no legacy support
 DEFINES   += BIP32_PUBKEY_VERSION=0x043587CF
 DEFINES   += BIP44_COIN_TYPE=1
 DEFINES   += BIP44_COIN_TYPE_2=1
@@ -53,24 +53,24 @@ DEFINES   += COIN_P2SH_VERSION=196
 DEFINES   += COIN_NATIVE_SEGWIT_PREFIX=\"tb\"
 DEFINES   += COIN_COINID_SHORT=\"TEST\"
 
-APPNAME = "Bitcoin Test"
+APPNAME = "Syscoin Test"
 
-else ifeq ($(COIN),bitcoin)
+else ifeq ($(COIN),syscoin)
 
-# Bitcoin mainnet, no legacy support
+# Syscoin mainnet, no legacy support
 DEFINES   += BIP32_PUBKEY_VERSION=0x0488B21E
-DEFINES   += BIP44_COIN_TYPE=0
-DEFINES   += BIP44_COIN_TYPE_2=0
-DEFINES   += COIN_P2PKH_VERSION=0
+DEFINES   += BIP44_COIN_TYPE=57
+DEFINES   += BIP44_COIN_TYPE_2=57
+DEFINES   += COIN_P2PKH_VERSION=63
 DEFINES   += COIN_P2SH_VERSION=5
-DEFINES   += COIN_NATIVE_SEGWIT_PREFIX=\"bc\"
-DEFINES   += COIN_COINID_SHORT=\"BTC\"
+DEFINES   += COIN_NATIVE_SEGWIT_PREFIX=\"sys\"
+DEFINES   += COIN_COINID_SHORT=\"SYS\"
 
-APPNAME = "Bitcoin"
+APPNAME = "Syscoin"
 
 else
 ifeq ($(filter clean,$(MAKECMDGOALS)),)
-$(error Unsupported COIN - use bitcoin_testnet, bitcoin)
+$(error Unsupported COIN - use syscoin_regtest, syscoin)
 endif
 endif
 
@@ -84,7 +84,7 @@ endif
 
 all: default
 
-# TODO: double check if all those flags are still relevant/needed (was copied from legacy app-bitcoin)
+# TODO: double check if all those flags are still relevant/needed (was copied from legacy app-syscoin)
 
 DEFINES   += APPNAME=\"$(APPNAME)\"
 DEFINES   += APPVERSION=\"$(APPVERSION)\"
@@ -199,7 +199,7 @@ dep/%.d: %.c Makefile
 
 
 listvariants:
-	@echo VARIANTS COIN bitcoin_testnet bitcoin
+	@echo VARIANTS COIN syscoin_regtest syscoin
 
 
 # Makes a detailed report of code and data size in debug/size-report.txt
