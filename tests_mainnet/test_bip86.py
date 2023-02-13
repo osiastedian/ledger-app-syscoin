@@ -17,18 +17,18 @@ def test_bip86(client: Client, speculos_globals: SpeculosGlobals):
         name="",
         descriptor_template="tr(@0/**)",
         keys_info=[
-            f"[{fpr}/86'/0'/0']xpub6DHZiJ3exSSEXbUXU6ms7wbrmxn4xmEUWACNa4KvySsfKEedUdkjdKkvuBzaCwby5BpYq3Mpz1yispmjsCcg7h6LCy7U6t6r5nz1WUEfceo",
+            f"[{fpr}/86'/0'/0']xpub6CXaPZmr2vSHZwkubMWbGMhV2512eXPaEPnYLyfuJou6QU6pk1w5WsEPCkqTNJRNATxZ3eHT2xtm3Y3VkbvbSxu3rasjdTNv3twG2Yvvv6W",
         ],
     )
 
     # Account 0, first receiving address = m/86'/0'/0'/0/0
     res = client.get_wallet_address(wallet, None, 0, 0, False)
-    assert res == "sys1p0m3eu6an4wkvh44xzmfv84gcgfzum3yc3mx3wdhldzcyaww094usc4ep9s"
+    assert res == "sys1p5cyxnuxmeuwuvkwfem96lqzszd02n6xdcjrs20cac6yqjjwudpxqkedrcr"
 
     # Account 0, second receiving address = m/86'/0'/0'/0/1
     res = client.get_wallet_address(wallet, None, 0, 1, False)
-    assert res == "sys1p8rnd42g79wm09mfjean0gpnh9xkfffehhsdj3ncry8j4ttn4d2hsxmam7a"
+    assert res == "sys1p4qhjn9zdvkux4e44uhx8tc55attvtyu358kutcqkudyccelu0was9fqzwh"
 
     # Account 1, first change address = m/86'/0'/0'/1/0
     res = client.get_wallet_address(wallet, None, 1, 0, False)
-    assert res == "sys1pxserze5gzhhtnm9l2d8evk0t3lqzqznx6948nrzfzcv72sqrv8ns979qmt"
+    assert res == "sys1p3qkhfews2uk44qtvauqyr2ttdsw7svhkl9nkm9s9c3x4ax5h60wqwruhk7"
