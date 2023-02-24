@@ -266,9 +266,4 @@ def createClient(comm_client: Optional[TransportClient] = None, chain: Chain = C
     # Use the legacy client if either:
     # - the name of the app is "Syscoin Legacy" or "Syscoin Test Legacy" (regardless of the version)
     # - the version is strictly less than 2.1
-    use_legacy = app_name in ["Syscoin Legacy", "Syscoin Test Legacy"] or version.major < 2 or (version.major == 2 and version.minor == 0)
-
-    if use_legacy:
-        return LegacyClient(comm_client, chain, debug)
-    else:
-        return NewClient(comm_client, chain, debug)
+    return NewClient(comm_client, chain, debug);
