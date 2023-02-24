@@ -9,7 +9,7 @@ RUN useradd -r syscoin \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ARG TARGETPLATFORM
-ENV SYSCOIN_VERSION=4.4.0rc1
+ENV SYSCOIN_VERSION=4.3.0
 ENV SYSCOIN_DATA=.test_syscoin
 
 RUN set -ex \
@@ -17,7 +17,7 @@ RUN set -ex \
     && if [ "${TARGETPLATFORM}" = "linux/arm64" ]; then export TARGETPLATFORM=aarch64-linux-gnu; fi \
     && if [ "${TARGETPLATFORM}" = "linux/arm/v7" ]; then export TARGETPLATFORM=arm-linux-gnueabihf; fi \
     && for key in \
-    01EA5486DE18A882D4C2684590C8019E36C2E964 \
+    79D00BAC68B56D422F945A8F8E3A8F3247DBCBBF \
     ; do \
     gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key" || \
     gpg --batch --keyserver pgp.mit.edu --recv-keys "$key" || \
