@@ -76,7 +76,7 @@ void handler_sign_message(dispatcher_context_t *dc, uint8_t p2) {
     cx_sha256_init(&bsm_digest_context);
 
     crypto_hash_update(&bsm_digest_context.header,
-                       BIP44_COIN_TYPE == 57 ? SYSM_SIGN_MAGIC: BSM_SIGN_MAGIC,
+                       BIP44_COIN_TYPE == 57 ? SYSM_SIGN_MAGIC : BSM_SIGN_MAGIC,
                        sizeof(BSM_SIGN_MAGIC));
 
     crypto_hash_update_varint(&bsm_digest_context.header, message_length);
