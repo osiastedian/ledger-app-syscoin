@@ -40,11 +40,4 @@ export const FingerPrintProvider: React.FC<{
       {children}
     </FingerPrintContext.Provider>
   );
-
-  //   return (
-  //     <div>
-  //       <span>Fingerprint: </span>
-  //       <span style={{ display: "block" }}>{fingerprint}</span>
-  //     </div>
-  //   );
 };

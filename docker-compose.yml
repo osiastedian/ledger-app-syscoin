@@ -11,5 +11,5 @@ services:
       - "5002:5002" # api
       - "40000:40000" # apdu
       - "41000:41000" # vnc
-    command: "--model nanos ./apps/syscoin.elf --sdk 2.0 --seed secret --display headless --apdu-port 40000 --vnc-port 41000 --api-port 5002"
+    command: "--model nanox ./apps/syscoin.elf --seed secret --display headless --apdu-port 40000 --vnc-port 41000 --api-port 5002"
     # Add `--vnc-password "<password>"` for macos users to use built-in vnc client.
