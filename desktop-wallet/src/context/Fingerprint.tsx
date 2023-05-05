@@ -22,6 +22,7 @@ export const FingerPrintProvider: React.FC<{
       if (params.length === 0) {
         return;
       }
+      console.log({ fingerprint: params[0] });
       setFingerprint(params[0]);
     });
   }, [isConnected]);

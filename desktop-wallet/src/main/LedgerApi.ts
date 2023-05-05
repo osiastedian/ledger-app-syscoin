@@ -1,17 +1,17 @@
 import axios from "axios";
 import SpeculosTransport from "@ledgerhq/hw-transport-node-speculos-http";
+import HIDTransport from "@ledgerhq/hw-transport-node-hid";
 import { DisconnectedDevice } from "@ledgerhq/errors";
+import { listen } from "@ledgerhq/logs";
 import {
   AppClient,
   DefaultWalletPolicy,
   PsbtV2,
   WalletPolicy,
-} from "../../../bitcoin_client_js/src";
+} from "../../../bitcoin_client_js/build/main";
 import { BrowserWindow, ipcMain } from "electron";
-import bitcoin, { payments, Psbt, Transaction } from "bitcoinjs-lib";
-import { inputs } from "bip174/src/lib/converter";
+import { Psbt } from "bitcoinjs-lib";
 import sjs from "syscoinjs-lib";
-import bs58 from "bs58";
 import { fromBase58 } from "bip32";
 
 const opts = {
@@ -39,6 +39,20 @@ const syscoinNetwork = {
 };
 
 const syscoin = new sjs.syscoin(null, BlockbookAPIURL, syscoinNetwork);
+
+const connectToLedgerDevice = () => {
+  return new Promise<HIDTransport>((resolve, reject) => {
+    HIDTransport.open("")
+      .then((transport) => {
+        listen((log) => console.log(log));
+        resolve(transport);
+      })
+      .catch((error) => {
+        console.error(JSON.stringify(error));
+        reject(error);
+      });
+  });
+};
 
 const connectToLedger = () => {
   return new Promise<SpeculosTransport>((resolve, reject) => {
@@ -68,9 +82,10 @@ const connectToLedger = () => {
 };
 
 export const setupLedgerApi = (window: BrowserWindow) => {
-  connectToLedger().then(() => {
+  // connectToLedger()
+  connectToLedgerDevice().then((transport) => {
     isConnected = true;
-    appClient = new AppClient(speculosTransport);
+    appClient = new AppClient(transport);
   });
 
   ipcMain.handle("request", (sender, method, params) => {
@@ -83,9 +98,14 @@ export const setupLedgerApi = (window: BrowserWindow) => {
 
       case "getMasterFingerprint":
         {
-          appClient.getMasterFingerprint().then((fingerPrint) => {
-            window.webContents.send("message", method, fingerPrint);
-          });
+          appClient
+            .getMasterFingerprint()
+            .then((fingerPrint) => {
+              window.webContents.send("message", method, fingerPrint);
+            })
+            .catch((e) => {
+              console.log("Fingerprint error", e);
+            });
         }
         break;
       case "getXpub": {
