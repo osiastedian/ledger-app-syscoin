@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Button, Col, ListGroup, Row } from "react-bootstrap";
 import { useBlockbook } from "../../context/Blockbook";
 
@@ -9,7 +8,7 @@ const AddressList = () => {
     return null;
   }
 
-  const xpubReceiveAddress = xpub.tokens.filter(
+  const xpubReceiveAddress = (xpub.tokens ?? []).filter(
     (t) => t.type === "XPUBAddress"
   );
 

@@ -41,8 +41,8 @@ const App = () => {
           <ConnectedCheck />
           <FingerPrintProvider>
             <BlockbookProvider>
-              {/* <HomePage /> */}
-              <TransferSend />
+              <HomePage />
+              {/* <TransferSend /> */}
             </BlockbookProvider>
           </FingerPrintProvider>
 

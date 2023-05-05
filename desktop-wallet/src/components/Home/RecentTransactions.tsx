@@ -8,6 +8,7 @@ const HomeRecentTransactions = () => {
       <p className="border-top mt-2 my-2 py-2">Recent Transactions:</p>
       <ListGroup>
         {xpub &&
+          xpub.txids &&
           xpub.txids.map((txId) => (
             <ListGroup.Item key={txId} className="text-truncate">
               {txId}
