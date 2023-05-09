@@ -5,7 +5,7 @@ services:
     image: local-speculos
     volumes:
       - ./src:/speculos/src
-      - ./syscoin-bin/app.elf:/speculos/apps/syscoin.elf
+      - ./build/nanox/bin/app.elf:/speculos/apps/syscoin.elf
     ports:
       - "1234:1234" # gdb
       - "5002:5002" # api

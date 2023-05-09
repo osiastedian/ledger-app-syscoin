@@ -89,7 +89,12 @@ const connectToLedger = () => {
 
 export const setupLedgerApi = (window: BrowserWindow) => {
   const connect = () => {
-    return connectToLedgerDevice().then((transport) => {
+    const connectFn =
+      process.env.DEVICE_TYPE === "speculos"
+        ? connectToLedger
+        : connectToLedgerDevice;
+
+    return connectFn().then((transport) => {
       isConnected = true;
       appClient = new AppClient(transport);
     });
