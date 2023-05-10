@@ -1,13 +1,10 @@
-import { Button, Col, Container, Row } from "react-bootstrap";
-import Balance from "./components/Home/Balance";
-import { FingerPrint } from "./components/Fingerprint";
+import { Button, Container } from "react-bootstrap";
 import HomePage from "./components/Home/Home";
-import { Xpub } from "./components/Xpub";
 import { FingerPrintProvider } from "./context/Fingerprint";
 import { TransportProvider, useTransport } from "./context/Transport";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BlockbookProvider } from "./context/Blockbook";
-import TransferSend from "./components/Transfer/Send";
+import { WalletProvider } from "./context/Wallet";
 
 const ConnectedCheck = () => {
   const { isConnected, checkConnection } = useTransport();
@@ -41,8 +38,10 @@ const App = () => {
           <ConnectedCheck />
           <FingerPrintProvider>
             <BlockbookProvider>
-              <HomePage />
-              {/* <TransferSend /> */}
+              <WalletProvider>
+                <HomePage />
+                {/* <TransferSend /> */}
+              </WalletProvider>
             </BlockbookProvider>
           </FingerPrintProvider>
 
