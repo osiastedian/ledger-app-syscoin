@@ -17,6 +17,8 @@ import sjs from "syscoinjs-lib";
 import { fromBase58 } from "bip32";
 import { BlockbookTransaction, BlockbookUTXO } from "../types/BlockbookUTXO";
 import { toSatoshi } from "satoshi-bitcoin";
+import fs from "fs";
+import path from "path";
 
 const opts = {
   baseURL: "http://localhost:5002",
@@ -103,6 +105,7 @@ export const setupLedgerApi = (window: BrowserWindow) => {
   connect();
 
   ipcMain.handle("request", (sender, method, params) => {
+    console.log(method, params);
     switch (method) {
       case "checkConnection":
         {
@@ -111,6 +114,46 @@ export const setupLedgerApi = (window: BrowserWindow) => {
           });
         }
         break;
+
+      case "saveLocalWallet": {
+        const [localWallet] = params;
+        appClient.getMasterFingerprint().then((fingerprint) => {
+          const container = path.resolve(__dirname, "data/wallets");
+
+          if (!fs.existsSync(container)) {
+            fs.mkdirSync(container);
+          }
+
+          const walletPath = path.resolve(
+            __dirname,
+            `data/wallets/${fingerprint}.json`
+          );
+
+          fs.writeFileSync(walletPath, JSON.stringify(localWallet));
+        });
+        break;
+      }
+
+      case "getLocalWallet": {
+        appClient.getMasterFingerprint().then((fingerprint) => {
+          const walletPath = path.resolve(
+            __dirname,
+            `data/wallets/${fingerprint}.json`
+          );
+          fs.readFile(walletPath, (err, data) => {
+            if (err) {
+              console.log(err);
+              window.webContents.send("message", method, null);
+            }
+            window.webContents.send(
+              "message",
+              method,
+              data ? JSON.parse(data.toString()) : null
+            );
+          });
+        });
+        break;
+      }
 
       case "getMasterFingerprint":
         {
@@ -127,7 +170,6 @@ export const setupLedgerApi = (window: BrowserWindow) => {
       case "getXpub": {
         {
           const [path] = params as string[];
-          console.log("getXpub", { path });
           appClient.getExtendedPubkey(path).then((fingerPrint) => {
             window.webContents.send("message", method, fingerPrint);
           });

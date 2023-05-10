@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -24,6 +25,11 @@ interface ITransportContext {
   query: Query;
 }
 
+interface IQueueItem {
+  method: string;
+  params: any[];
+}
+
 const TransportContext = createContext<ITransportContext>({
   isConnected: false,
 } as ITransportContext);
@@ -34,6 +40,7 @@ export const TransportProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [isConnected, setIsConnected] = useState(false);
+  const queue = useRef<IQueueItem[]>([]);
 
   const onMessage = useCallback(
     (_: any, ...args: any[]) => {
@@ -56,6 +63,7 @@ export const TransportProvider: React.FC<{ children: React.ReactNode }> = ({
       const timeout = setTimeout(() => {
         reject("Timeout");
       }, 100_000);
+
       window.LEDGER_API.onceMessage((_, ...args) => {
         const [method, ...params] = args;
         if (method === queryKey) {
@@ -63,13 +71,24 @@ export const TransportProvider: React.FC<{ children: React.ReactNode }> = ({
           clearTimeout(timeout);
         }
       });
-      window.LEDGER_API.request(queryKey, ...args);
+      queue.current.push({ method: queryKey, params: args });
     });
   }
 
   useEffect(() => {
     window.LEDGER_API.onMessage(onMessage);
     checkConnection();
+    const interval = setInterval(() => {
+      if (queue.current.length === 0) {
+        return;
+      }
+      const { method, params } = queue.current.shift();
+      window.LEDGER_API.request(method, ...params);
+    }, 500);
+
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
 
   return (
