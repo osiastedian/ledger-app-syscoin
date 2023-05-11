@@ -303,7 +303,18 @@ export const setupLedgerApi = (window: BrowserWindow) => {
                         } else {
                           psbt.setInputPartialSig(index, pubkeySign, signature);
                         }
+
+                        console.log(
+                          entry[0],
+                          entry[1].toString("hex"),
+                          entry[2].toString("hex")
+                        );
                       });
+
+                      console.log(
+                        "psbt serialized",
+                        psbt.serialize().toString("hex")
+                      );
 
                       const transaction = Transaction.fromBuffer(
                         psbt.serialize()
