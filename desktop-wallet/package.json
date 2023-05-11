@@ -55,6 +55,7 @@
     "react-bootstrap": "^2.7.2",
     "react-dom": "^18.2.0",
     "react-icons": "^4.8.0",
+    "react-router-dom": "^6.11.1",
     "sass": "^1.60.0",
     "sass-loader": "^13.2.1",
     "satoshi-bitcoin": "^1.0.5",

@@ -1,5 +1,6 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext } from "react";
 import { useTransport } from "../context/Transport";
+import { useQuery } from "@tanstack/react-query";
 
 const FingerPrintContext = createContext({
   fingerprint: undefined,
@@ -11,21 +12,14 @@ export const FingerPrintProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const { isConnected, query } = useTransport();
-  const [fingerprint, setFingerprint] = useState<string>();
-
-  useEffect(() => {
-    if (!isConnected) {
-      return;
-    }
-
-    query("getMasterFingerprint").then((params: string[]) => {
-      if (params.length === 0) {
-        return;
-      }
-      console.log({ fingerprint: params[0] });
-      setFingerprint(params[0]);
-    });
-  }, [isConnected]);
+  const { data: fingerprint } = useQuery(["fingerprint"], {
+    queryFn: async () => {
+      const [fingerprint]: [string] = await query("getMasterFingerprint");
+      console.log({ fingerprint });
+      return fingerprint;
+    },
+    enabled: isConnected,
+  });
 
   if (!isConnected) {
     return null;

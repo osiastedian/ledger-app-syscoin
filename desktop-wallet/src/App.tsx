@@ -1,35 +1,30 @@
-import { Button, Container } from "react-bootstrap";
-import HomePage from "./components/Home/Home";
+import { RouterProvider, createHashRouter } from "react-router-dom";
 import { FingerPrintProvider } from "./context/Fingerprint";
-import { TransportProvider, useTransport } from "./context/Transport";
+import { TransportProvider } from "./context/Transport";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BlockbookProvider } from "./context/Blockbook";
 import { WalletProvider } from "./context/Wallet";
+
+import HomePage from "./components/Home/Home";
 import TransferSend from "./components/Transfer/Send";
-
-const ConnectedCheck = () => {
-  const { isConnected, checkConnection } = useTransport();
-
-  if (isConnected) {
-    return null;
-  }
-
-  return (
-    <Container className="d-flex h-100">
-      <Button
-        size="lg"
-        className="m-auto"
-        onClick={() => {
-          checkConnection();
-        }}
-      >
-        Connect
-      </Button>
-    </Container>
-  );
-};
+import TransferReceive from "./components/Transfer/Receive";
+import ConnectedCheck from "./components/ConnectedCheck";
 
 const queryClient = new QueryClient();
+const router = createHashRouter([
+  {
+    path: "/",
+    element: <HomePage />,
+  },
+  {
+    path: "/send",
+    element: <TransferSend />,
+  },
+  {
+    path: "/receive",
+    element: <TransferReceive />,
+  },
+]);
 
 const App = () => {
   return (
@@ -40,8 +35,7 @@ const App = () => {
           <FingerPrintProvider>
             <BlockbookProvider>
               <WalletProvider>
-                {/* <HomePage /> */}
-                <TransferSend />
+                <RouterProvider router={router} />
               </WalletProvider>
             </BlockbookProvider>
           </FingerPrintProvider>

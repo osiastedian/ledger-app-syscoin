@@ -16,8 +16,7 @@ interface ILocalWallet {
 }
 
 interface IWalletContext {
-  addresses: string[];
-  createAddress: (isChange: boolean) => void;
+  getLatestAddress: (isChange: boolean) => Promise<string>;
 }
 
 const WalletContext = createContext<IWalletContext>({} as IWalletContext);
@@ -31,65 +30,36 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { query } = useTransport();
   const { fingerprint } = useFingerprint();
-  const { path } = useBlockbook();
+  const { xpub, path } = useBlockbook();
 
-  const [addresses, setAddresses] = useState<string[]>([]);
-  const [changeAddresses, setChangeAddresses] = useState<string[]>([]);
-
-  const createAddress = useCallback(
+  const getLatestAddress = useCallback(
     (isChange: boolean) => {
-      query("getXpub", path).then(([xpub]) => {
-        query(
+      return query("getXpub", path).then(([xpubStr]) => {
+        return query(
           "getAddress",
           fingerprint,
-          xpub,
+          xpubStr,
           path,
           descriptor,
           isChange ? 1 : 0,
-          isChange ? changeAddresses.length : addresses.length
+          isChange ? xpub.txs : 0
         ).then((params: string[]) => {
           if (params.length === 0) {
             return;
           }
-          if (isChange) {
-            setChangeAddresses((changeAddresses) => [
-              ...changeAddresses,
-              params[0],
-            ]);
-          } else {
-            setAddresses((addresses) => [...addresses, params[0]]);
-          }
+          return params[0];
         });
       });
     },
-    [fingerprint, path, query, addresses, changeAddresses]
+    [fingerprint, path, query, xpub]
   );
 
   const value = useMemo(
     () => ({
-      addresses,
-      createAddress,
+      getLatestAddress,
     }),
-    [fingerprint, path, addresses]
+    [getLatestAddress]
   );
-
-  useEffect(() => {
-    if (!fingerprint) {
-      return;
-    }
-    query("getLocalWallet").then((params) => {
-      const localWallet: ILocalWallet = params[0];
-      if (!localWallet) {
-        return;
-      }
-      setAddresses(localWallet.addresses);
-      setChangeAddresses(localWallet.changeAddresses);
-    });
-  }, []);
-
-  useEffect(() => {
-    query("saveLocalWallet", { addresses, changeAddresses });
-  }, [addresses, changeAddresses]);
 
   return (
     <WalletContext.Provider value={value}>{children}</WalletContext.Provider>

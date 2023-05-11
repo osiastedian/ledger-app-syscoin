@@ -1,8 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
 import { useReducer, useState } from "react";
 import { Button, Container, Form, InputGroup } from "react-bootstrap";
 import { useBlockbook } from "../../context/Blockbook";
 import { toSatoshi, toBitcoin } from "satoshi-bitcoin";
+import { useNavigate } from "react-router-dom";
+import { FaArrowLeft } from "react-icons/fa";
 
 type TransferState = {
   status:
@@ -35,6 +36,7 @@ type SendToBlockbook = {
 type Actions = RequestSignatureAction | SendToBlockbook;
 
 const TransferSend = () => {
+  const navigate = useNavigate();
   const { sendAmount, xpub } = useBlockbook();
   const balance = xpub ? toBitcoin(xpub.balance) : undefined;
   const recommendedFee = 0.00001;
@@ -74,8 +76,19 @@ const TransferSend = () => {
   const isInvalidAmount =
     toSatoshi(amount) > toSatoshi(balance ?? 0) - toSatoshi(recommendedFee);
 
+  const goBack = () => {
+    navigate("/");
+  };
+
   return (
     <Container>
+      <Button
+        variant="outline-secondary mr-auto mb-5 d-flex align-items-center"
+        onClick={goBack}
+      >
+        <FaArrowLeft className="mr-1" />
+        <span className="mx-2">Back</span>
+      </Button>
       <Form onSubmit={onSubmit}>
         <Form.Group>
           <Form.Label htmlFor="to">To</Form.Label>
