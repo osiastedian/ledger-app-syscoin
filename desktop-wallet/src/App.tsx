@@ -5,6 +5,7 @@ import { TransportProvider, useTransport } from "./context/Transport";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BlockbookProvider } from "./context/Blockbook";
 import { WalletProvider } from "./context/Wallet";
+import TransferSend from "./components/Transfer/Send";
 
 const ConnectedCheck = () => {
   const { isConnected, checkConnection } = useTransport();
@@ -39,16 +40,11 @@ const App = () => {
           <FingerPrintProvider>
             <BlockbookProvider>
               <WalletProvider>
-                <HomePage />
-                {/* <TransferSend /> */}
+                {/* <HomePage /> */}
+                <TransferSend />
               </WalletProvider>
             </BlockbookProvider>
           </FingerPrintProvider>
-
-          {/* <FingerPrintProvider>
-          <FingerPrint />
-          <Xpub />
-        </FingerPrintProvider> */}
         </TransportProvider>
       </QueryClientProvider>
     </div>

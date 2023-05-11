@@ -19,6 +19,7 @@ import { BlockbookTransaction, BlockbookUTXO } from "../types/BlockbookUTXO";
 import { toSatoshi } from "satoshi-bitcoin";
 import fs from "fs";
 import path from "path";
+import { BlockbookAPIURL, SYSCOIN_NETWORK } from "../constants";
 
 const opts = {
   baseURL: "http://localhost:5002",
@@ -30,21 +31,7 @@ let isConnected = false;
 
 let appClient: AppClient;
 
-const BlockbookAPIURL = "https://blockbook.elint.services/";
-
-const syscoinNetwork = {
-  messagePrefix: "\x18Syscoin Signed Message:\n",
-  bech32: "sys",
-  bip32: {
-    public: 0x0488b21e,
-    private: 0x0488ade4,
-  },
-  pubKeyHash: 0x3f,
-  scriptHash: 0x05,
-  wif: 0x80,
-};
-
-const syscoin = new sjs.syscoin(null, BlockbookAPIURL, syscoinNetwork);
+const syscoin = new sjs.syscoin(null, BlockbookAPIURL, SYSCOIN_NETWORK);
 
 const connectToLedgerDevice = () => {
   return new Promise<HIDTransport>((resolve, reject) => {
@@ -246,7 +233,6 @@ export const setupLedgerApi = (window: BrowserWindow) => {
               }
               return acc.derive(der);
             }, account);
-
             return fetch(url)
               .then((resp) => resp.json())
               .then((transaction: BlockbookTransaction) => {
@@ -270,73 +256,75 @@ export const setupLedgerApi = (window: BrowserWindow) => {
               });
           });
 
-          Promise.all(loadInputs).then((inputs) => {
-            const bitcoinPsbt = new Psbt({
-              network: syscoinNetwork,
-            });
-
-            bitcoinPsbt.addInputs(inputs);
-            console.log("bitcoinPsbt.txInputs", bitcoinPsbt.txInputs);
-            bitcoinPsbt.addOutput({
-              address: sysAddress,
-              value: toSatoshi(amount),
-            });
-
-            const policy = `[${path}]${xpub}`.replace("m", fingerprint);
-            const walletPolicy = new DefaultWalletPolicy(descriptor, policy);
-
-            appClient
-              .getWalletAddress(walletPolicy, null, 1, 0, false)
-              .then((changeAddress) => {
-                const fees = toSatoshi(0.00001);
-
-                const total = utxos.reduce((acc, utxo) => {
-                  return acc + parseInt(utxo.value);
-                }, 0);
-
-                bitcoinPsbt.addOutput({
-                  address: changeAddress,
-                  value: total - toSatoshi(amount) - fees,
-                });
-
-                const psbt = new PsbtV2();
-
-                psbt.fromBitcoinJS(bitcoinPsbt);
-
-                appClient
-                  .signPsbt(psbt, walletPolicy, null)
-                  .then((entries) => {
-                    console.log("Sign psbt resp", { entries });
-
-                    entries.forEach((entry, i) => {
-                      const [index, pubkeySign, signature] = entry;
-
-                      if (i === entries.length - 1) {
-                        psbt.setInputFinalScriptsig(index, signature);
-                      } else {
-                        psbt.setInputPartialSig(index, pubkeySign, signature);
-                      }
-                    });
-
-                    const transaction = Transaction.fromBuffer(
-                      psbt.serialize()
-                    );
-
-                    console.log({
-                      inputs: transaction.ins,
-                      outputs: transaction.outs,
-                      hext: transaction.toHex(),
-                    });
-
-                    window.webContents.send(
-                      "message",
-                      method,
-                      psbt.serialize().toString("hex")
-                    );
-                  })
-                  .catch((e) => console.error("SignPsbt error", { e }));
+          Promise.all(loadInputs)
+            .then((inputs) => {
+              const bitcoinPsbt = new Psbt({
+                network: SYSCOIN_NETWORK,
               });
-          });
+
+              bitcoinPsbt.addInputs(inputs);
+              console.log("bitcoinPsbt.txInputs", bitcoinPsbt.txInputs);
+              bitcoinPsbt.addOutput({
+                address: sysAddress,
+                value: toSatoshi(amount),
+              });
+
+              const policy = `[${path}]${xpub}`.replace("m", fingerprint);
+              const walletPolicy = new DefaultWalletPolicy(descriptor, policy);
+
+              appClient
+                .getWalletAddress(walletPolicy, null, 1, 0, false)
+                .then((changeAddress) => {
+                  const fees = toSatoshi(0.00001);
+
+                  const total = utxos.reduce((acc, utxo) => {
+                    return acc + parseInt(utxo.value);
+                  }, 0);
+
+                  bitcoinPsbt.addOutput({
+                    address: changeAddress,
+                    value: total - toSatoshi(amount) - fees,
+                  });
+
+                  const psbt = new PsbtV2();
+
+                  psbt.fromBitcoinJS(bitcoinPsbt);
+
+                  appClient
+                    .signPsbt(psbt, walletPolicy, null)
+                    .then((entries) => {
+                      console.log("Sign psbt resp", { entries });
+
+                      entries.forEach((entry, i) => {
+                        const [index, pubkeySign, signature] = entry;
+
+                        if (i === entries.length - 1) {
+                          psbt.setInputFinalScriptsig(index, signature);
+                        } else {
+                          psbt.setInputPartialSig(index, pubkeySign, signature);
+                        }
+                      });
+
+                      const transaction = Transaction.fromBuffer(
+                        psbt.serialize()
+                      );
+
+                      console.log({
+                        inputs: transaction.ins,
+                        outputs: transaction.outs,
+                        hext: transaction.toHex(),
+                      });
+
+                      window.webContents.send(
+                        "message",
+                        method,
+                        psbt.serialize().toString("hex")
+                      );
+                    })
+                    .catch((e) => console.error("SignPsbt error", { e }));
+                });
+            })
+            .catch((e) => console.log(e));
         }
         break;
 

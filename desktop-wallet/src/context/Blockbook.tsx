@@ -3,6 +3,7 @@ import { createContext, useContext } from "react";
 import { BlockbookUTXO } from "../types/BlockbookUTXO";
 import { useFingerprint } from "./Fingerprint";
 import { useTransport } from "./Transport";
+import { BlockbookAPIURL } from "../constants";
 
 type BlockbookApiGetXpub = {
   page: number;
@@ -75,7 +76,7 @@ export const BlockbookProvider: React.FC<BlockbookProviderProps> = ({
     queryFn: async () => {
       const xpubValue = xpub.data;
       const descriptor = getDescriptor(xpubValue);
-      const url = `https://blockbook.elint.services/api/v2/xpub/${descriptor}`;
+      const url = `${BlockbookAPIURL}/api/v2/xpub/${descriptor}`;
       const fetchVal: BlockbookApiGetXpub = await fetch(url).then((resp) =>
         resp.json()
       );
@@ -88,7 +89,7 @@ export const BlockbookProvider: React.FC<BlockbookProviderProps> = ({
     queryFn: async () => {
       const xpubValue = xpub.data;
       const descriptor = getDescriptor(xpubValue);
-      const url = `https://blockbook.elint.services/api/v2/utxo/${descriptor}`;
+      const url = `${BlockbookAPIURL}/api/v2/utxo/${descriptor}`;
       const resp: UTXOPayload = await fetch(url).then((resp) => resp.json());
       return resp.utxos;
     },
@@ -107,7 +108,7 @@ export const BlockbookProvider: React.FC<BlockbookProviderProps> = ({
       utxos.data
     ).then((data) => {
       console.log("Send Amount", { data });
-      const url = "https://blockbook.elint.services/api/v2/sendtx/";
+      const url = `${BlockbookAPIURL}/api/v2/sendtx/`;
       return fetch(url, { method: "POST", body: data[0] });
     });
   };
