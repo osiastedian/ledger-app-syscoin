@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { createContext, useContext } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createContext, useContext, useMemo } from "react";
 import { BlockbookUTXO } from "../types/BlockbookUTXO";
 import { useFingerprint } from "./Fingerprint";
 import { useTransport } from "./Transport";
@@ -37,7 +37,8 @@ type UTXOPayload = {
 interface IBlockbookContext {
   xpub: BlockbookApiGetXpub;
   path: string;
-  sendAmount: (toAddress: string, amount: string) => void;
+  send: (params: { toAddress: string; amount: string }) => Promise<string>;
+  confirmTx: (txid: string) => Promise<boolean>;
 }
 
 const BlockbookContext = createContext({} as IBlockbookContext);
@@ -96,8 +97,9 @@ export const BlockbookProvider: React.FC<BlockbookProviderProps> = ({
     enabled: xpubQuery.isSuccess,
   });
 
-  const sendAmount = (toAddress: string, amount: string) => {
-    query(
+  const send = async (params: { toAddress: string; amount: string }) => {
+    const { amount, toAddress } = params;
+    const [tx] = await query(
       "signPsbt",
       fingerprint,
       xpub.data,
@@ -106,21 +108,32 @@ export const BlockbookProvider: React.FC<BlockbookProviderProps> = ({
       toAddress,
       amount,
       utxos.data
-    ).then((data) => {
-      console.log("Send Amount", { data });
-      const url = `${BlockbookAPIURL}/api/v2/sendtx/`;
-      return fetch(url, { method: "POST", body: data[0] });
-    });
+    );
+    const url = `${BlockbookAPIURL}/api/v2/sendtx/${tx.hex}`;
+    return fetch(url)
+      .then((resp) => resp.json())
+      .then(({ result }) => result);
   };
 
+  const confirmTx = async (txid: string) => {
+    const url = `${BlockbookAPIURL}/api/v2/tx/${txid}`;
+    const { confirmations } = await fetch(url).then((resp) => resp.json());
+
+    return confirmations > 0;
+  };
+
+  const value = useMemo(
+    () => ({
+      xpub: xpubQuery.isSuccess ? xpubQuery.data : undefined,
+      path,
+      send,
+      confirmTx,
+    }),
+    [send, xpubQuery.data, path]
+  );
+
   return (
-    <BlockbookContext.Provider
-      value={{
-        xpub: xpubQuery.isSuccess ? xpubQuery.data : undefined,
-        path,
-        sendAmount,
-      }}
-    >
+    <BlockbookContext.Provider value={value}>
       {children}
     </BlockbookContext.Provider>
   );

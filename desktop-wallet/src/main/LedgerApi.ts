@@ -297,34 +297,24 @@ export const setupLedgerApi = (window: BrowserWindow) => {
 
                       entries.forEach((entry, i) => {
                         const [index, pubkeySign, signature] = entry;
-
-                        if (i === entries.length - 1) {
-                          psbt.setInputFinalScriptsig(index, signature);
-                        } else {
-                          psbt.setInputPartialSig(index, pubkeySign, signature);
-                        }
+                        bitcoinPsbt.updateInput(index, {
+                          partialSig: [
+                            {
+                              pubkey: pubkeySign,
+                              signature: signature,
+                            },
+                          ],
+                        });
                       });
 
-                      console.log(
-                        "psbt serialized",
-                        psbt.serialize().toString("base64")
-                      );
+                      bitcoinPsbt.finalizeAllInputs();
 
-                      const transaction = Transaction.fromBuffer(
-                        psbt.serialize()
-                      );
+                      const transaction = bitcoinPsbt.extractTransaction();
 
-                      console.log({
-                        inputs: transaction.ins,
-                        outputs: transaction.outs,
-                        hext: transaction.toHex(),
+                      window.webContents.send("message", method, {
+                        id: transaction.getId(),
+                        hex: transaction.toHex(),
                       });
-
-                      window.webContents.send(
-                        "message",
-                        method,
-                        psbt.serialize().toString("hex")
-                      );
                     })
                     .catch((e) => console.error("SignPsbt error", { e }));
                 });
