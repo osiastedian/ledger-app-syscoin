@@ -9,7 +9,7 @@ RUN useradd -r syscoin \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ARG TARGETPLATFORM
-ENV SYSCOIN_VERSION=4.3.0
+ENV SYSCOIN_VERSION=4.4.2
 ENV SYSCOIN_DATA=.test_syscoin
 
 RUN set -ex \
