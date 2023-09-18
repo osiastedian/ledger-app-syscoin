@@ -88,9 +88,9 @@ endif
 
 # Application icons following guidelines:
 # https://developers.ledger.com/docs/embedded-app/design-requirements/#device-icon
-ICON_NANOS = icons/nanos_app_bitcoin.gif
-ICON_NANOX = icons/nanox_app_bitcoin.gif
-ICON_NANOSP = icons/nanox_app_bitcoin.gif
+ICON_NANOS = icons/nanos_app_syscoin.gif
+ICON_NANOX = icons/nanox_app_syscoin.gif
+ICON_NANOSP = icons/nanox_app_syscoin.gif
 ICON_STAX = icons/stax_app_bitcoin.gif
 
 ########################################

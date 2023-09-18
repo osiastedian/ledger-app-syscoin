@@ -24,10 +24,10 @@
 
 // We have a screen with the icon and "Syscoin is ready" for Syscoin,
 // "Syscoin Testnet is ready" for Syscoin Testnet.
-UX_STEP_NOCB(ux_menu_ready_step_bitcoin, pnn, {&C_bitcoin_logo, "Syscoin", "is ready"});
+UX_STEP_NOCB(ux_menu_ready_step_bitcoin, pnn, {&C_syscoin_logo, "Syscoin", "is ready"});
 UX_STEP_NOCB(ux_menu_ready_step_bitcoin_testnet,
              pnn,
-             {&C_bitcoin_logo, "Syscoin Testnet", "is ready"});
+             {&C_syscoin_logo, "Syscoin Testnet", "is ready"});
 
 UX_STEP_NOCB(ux_menu_version_step, bn, {"Version", APPVERSION});
 UX_STEP_CB(ux_menu_about_step, pb, ui_menu_about(), {&C_icon_certificate, "About"});
