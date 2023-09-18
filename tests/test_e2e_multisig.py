@@ -82,12 +82,8 @@ def run_test(wallet_policy: WalletPolicy, core_wallet_names: List[str], rpc: Aut
     result = multisig_rpc.walletcreatefundedpsbt(
         outputs={
             out_address: Decimal("0.01")
-        },
-        options={
-            # make sure that the fee is large enough; it looks like
-            # fee estimation doesn't work in core with miniscript, yet
-            "fee_rate": 10
-        })
+        }
+    )
 
     psbt_b64 = result["psbt"]
 
@@ -172,6 +168,7 @@ def test_e2e_multisig_multiple_internal_keys(rpc: AuthServiceProxy, rpc_test_wal
              rpc, rpc_test_wallet, client, speculos_globals, comm)
 
 
+@pytest.mark.timeout(0)  # disable timeout
 def test_e2e_multisig_16_of_16(rpc: AuthServiceProxy, rpc_test_wallet, client: Client, speculos_globals: SpeculosGlobals, comm: Union[TransportClient, SpeculosClient], enable_slow_tests: bool):
     # Largest supported multisig with sortedmulti.
     # The time for an end-to-end execution on a real Ledger Nano S (including user's input) is about 520 seconds.

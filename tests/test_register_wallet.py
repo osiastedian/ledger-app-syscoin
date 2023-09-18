@@ -118,6 +118,21 @@ def test_register_wallet_invalid_names(client: Client):
 
 
 @has_automation("automations/register_wallet_accept.json")
+def test_register_wallet_missing_key(client: Client):
+    wallet = WalletPolicy(
+        name="Missing a key",
+        descriptor_template="wsh(multi(2,@0/**,@1/**))",
+        keys_info=[
+            "[f5acc2fd/48'/1'/0'/2']tpubDFAqEGNyad35aBCKUAXbQGDjdVhNueno5ZZVEn3sQbW5ci457gLR7HyTmHBg93oourBssgUxuWz1jX5uhc1qaqFo9VsybY1J5FuedLfm4dK",
+            # the second key is missing
+        ],
+    )
+
+    with pytest.raises(IncorrectDataError):
+        client.register_wallet(wallet)
+
+
+@has_automation("automations/register_wallet_accept.json")
 def test_register_wallet_unsupported_policy(client: Client):
     # valid policies, but not supported (might change in the future)
 
@@ -132,7 +147,7 @@ def test_register_wallet_unsupported_policy(client: Client):
 
 
 @has_automation("automations/register_wallet_accept.json")
-def test_register_miniscript_long_policy(client: Client, speculos_globals, model):
+def test_register_miniscript_long_policy(client: Client, speculos_globals, model: str):
     # This test makes sure that policies longer than 256 bytes work as expected on all devices,
     # except on Nano S that has 196 bytes as a technical limitation.
     wallet = WalletPolicy(

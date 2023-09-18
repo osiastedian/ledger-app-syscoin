@@ -147,6 +147,7 @@ export const setupLedgerApi = (window: BrowserWindow) => {
           appClient
             .getMasterFingerprint()
             .then((fingerPrint) => {
+              console.log("Fingerprint", fingerPrint);
               window.webContents.send("message", method, fingerPrint);
             })
             .catch((e) => {

@@ -2,11 +2,7 @@ use std::error::Error;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use bitcoin::{
-    consensus::encode::deserialize,
-    hashes::hex::{FromHex, ToHex},
-    util::{bip32, psbt::Psbt},
-};
+use bitcoin::{bip32, hashes::hex::FromHex, psbt::Psbt};
 
 use hidapi::HidApi;
 use ledger_transport_hid::TransportNativeHID;
@@ -14,6 +10,7 @@ use regex::Regex;
 
 use ledger_bitcoin_client::{
     async_client::{BitcoinClient, Transport},
+    psbt::PartialSignature,
     wallet::{Version, WalletPolicy, WalletPubKey},
 };
 
@@ -86,7 +83,7 @@ async fn main() {
                 "name: {}\nversion: {}\nflags: {}",
                 name,
                 version,
-                flags.to_hex()
+                hex::encode(flags)
             );
         }
         Some(Commands::GetFingerprint) => {
@@ -151,7 +148,7 @@ async fn register_wallet<T: Transport>(
         .register_wallet(&wallet)
         .await
         .map_err(|e| format!("{:#?}", e))?;
-    println!("{}", hmac.to_hex());
+    println!("{}", hex::encode(hmac));
     Ok(())
 }
 
@@ -162,7 +159,7 @@ async fn sign<T: Transport>(
     policy: &str,
     hmac: Option<&str>,
 ) -> Result<(), Box<dyn Error>> {
-    let psbt: Psbt = deserialize(&base64::decode(&psbt)?).map_err(|e| format!("{:#?}", e))?;
+    let psbt = Psbt::deserialize(&base64::decode(&psbt)?).map_err(|e| format!("{:#?}", e))?;
     let (descriptor_template, keys) = extract_keys_and_template(policy)?;
     let wallet = WalletPolicy::new(name.to_string(), Version::V2, descriptor_template, keys);
     let hmac = if let Some(s) = hmac {
@@ -178,8 +175,23 @@ async fn sign<T: Transport>(
         .await
         .map_err(|e| format!("{:#?}", e))?;
 
-    for (index, key, sig) in res {
-        println!("index: {}, key: {}, sig: {}", index, key, sig);
+    for (index, sig) in res {
+        match sig {
+            PartialSignature::Sig(key, sig) => {
+                println!("index: {}, key: {}, sig: {}", index, key, sig);
+            }
+            PartialSignature::TapScriptSig(key, tapleaf_hash, sig) => {
+                println!(
+                    "index: {}, key: {}, tapleaf_hash: {}, sig: {}",
+                    index,
+                    key,
+                    tapleaf_hash
+                        .map(|h| hex::encode(h))
+                        .unwrap_or("none".to_string()),
+                    hex::encode(sig.to_vec())
+                );
+            }
+        }
     }
     Ok(())
 }
@@ -190,7 +202,9 @@ fn extract_keys_and_template(policy: &str) -> Result<(String, Vec<WalletPubKey>)
     let mut pubkeys: Vec<WalletPubKey> = Vec::new();
     for (index, capture) in re.find_iter(policy).enumerate() {
         let pubkey = WalletPubKey::from_str(capture.as_str()).map_err(|e| format!("{}", e))?;
-        pubkeys.push(pubkey);
+        if !pubkeys.contains(&pubkey) {
+            pubkeys.push(pubkey);
+        }
         descriptor_template = descriptor_template.replace(capture.as_str(), &format!("@{}", index));
     }
     if let Some((descriptor_template, _hash)) = descriptor_template.rsplit_once("#") {

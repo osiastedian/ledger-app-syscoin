@@ -54,18 +54,37 @@ def should_go_right(event: dict):
     return False
 
 
+def ux_thread_sign_psbt_stax(speculos_client: SpeculosClient, all_events: List[dict]):
+    """Completes the signing flow always going right and accepting at the appropriate time, while collecting all the events in all_events."""
+
+    first_approve = True
+
+    while True:
+        event = speculos_client.get_next_event()
+        all_events.append(event)
+
+        if "Tap to continue" in event["text"]:
+            speculos_client.finger_touch(55, 550)
+
+        elif first_approve and "Hold to sign" in event["text"]:
+            first_approve = False
+            speculos_client.finger_touch(55, 550, 3)
+
+        elif "SIGNED" in event["text"]:
+            break
+
+
 def ux_thread_sign_psbt(speculos_client: SpeculosClient, all_events: List[dict]):
     """Completes the signing flow always going right and accepting at the appropriate time, while collecting all the events in all_events."""
 
     # press right until the last screen (will press the "right" button more times than needed)
-
     while True:
         event = speculos_client.get_next_event()
         all_events.append(event)
 
         if should_go_right(event):
             speculos_client.press_and_release("right")
-        elif event["text"] == "Approve":
+        elif "Approve" in event["text"]:
             speculos_client.press_and_release("both")
         elif event["text"] == "Accept":
             speculos_client.press_and_release("both")
@@ -95,18 +114,30 @@ def parse_signing_events(events: List[dict]) -> dict:
             ret["amounts"].append("")
             next_step = ""
 
+        elif ev["text"].startswith("Tap"):
+            ret["addresses"].append("")
+            ret["amounts"].append("")
+            next_step = ""
+            continue
+
         elif ev["text"].startswith(keywords):
             next_step = ev["text"]
             continue
 
         if next_step.startswith("Address"):
-            ret["addresses"][-1] += ev["text"]
+            if len(ret["addresses"]) == 0:
+                ret["addresses"].append("")
+
+            ret["addresses"][-1] += ev["text"].strip().replace("O", "0")  # OCR misreads O for 0
 
         elif next_step.startswith("Fees"):
-            ret["fees"] += ev["text"]
+            ret["fees"] += ev["text"].strip()
 
         elif next_step.startswith("Amount"):
-            ret["amounts"][-1] += ev["text"]
+            if len(ret["amounts"]) == 0:
+                ret["amounts"].append("")
+
+            ret["amounts"][-1] += ev["text"].strip()
 
     return ret
 
@@ -304,6 +335,25 @@ def test_sign_psbt_singlesig_wpkh_2to2_missing_nonwitnessutxo(client: Client):
     )]
 
 
+@has_automation("automations/sign_with_default_wallet_accept.json")
+def test_sign_psbt_singlesig_wpkh_selftransfer(client: Client):
+    # The only output is a change output.
+    # A "self-transfer" screen should be shown before the fees.
+
+    wallet = WalletPolicy(
+        "",
+        "wpkh(@0/**)",
+        [
+            "[f5acc2fd/84'/1'/0']tpubDCtKfsNyRhULjZ9XMS4VKKtVcPdVDi8MKUbcSD9MJDyjRu1A2ND5MiipozyyspBT9bg8upEp7a8EAgFxNxXn1d7QkdbL52Ty5jiSLcxPt1P"
+        ],
+    )
+
+    psbt = "cHNidP8BAHECAAAAAfcDVJxLN1tzz5vaIy2onFL/ht/OqwKm2jEWGwMNDE/cAQAAAAD9////As0qAAAAAAAAFgAUJfcXOL7SoYGoDC1n6egGa0OTD9/mtgEAAAAAABYAFDXG4N1tPISxa6iF3Kc6yGPQtZPsTTQlAAABAPYCAAAAAAEBCOcYS1aMP1uQcUKTMJbvlsZXsV4yNnVxynyMfxSX//UAAAAAFxYAFGEWho6AN6qeux0gU3BSWnK+Dw4D/f///wKfJwEAAAAAABepFG1IUtrzpUCfdyFtu46j1ZIxLX7ph0DiAQAAAAAAFgAU4e5IJz0XxNe96ANYDugMQ34E0/cCRzBEAiB1b84pX0QaOUrvCdDxKeB+idM6wYKTLGmqnUU/tL8/lQIgbSinpq4jBlo+SIGyh8XNVrWAeMlKBNmoLenKOBugKzcBIQKXsd8NwO+9naIfeI3nkgYjg6g3QZarGTRDs7SNVZfGPJBJJAABAR9A4gEAAAAAABYAFOHuSCc9F8TXvegDWA7oDEN+BNP3IgYCgffBheEUZI8iAFFfv7b+HNM7j4jolv6lj5/n3j68h3kY9azC/VQAAIABAACAAAAAgAAAAAAHAAAAACICAzQZjNnkwXFEhm1F6oC2nk1ADqH6t/RHBAOblLA4tV5BGPWswv1UAACAAQAAgAAAAIABAAAAEgAAAAAiAgJxtbd5rYcIOFh3l7z28MeuxavnanCdck9I0uJs+HTwoBj1rML9VAAAgAEAAIAAAACAAQAAAAAAAAAA"
+    result = client.sign_psbt(psbt, wallet, None)
+
+    assert len(result) == 1
+
+
 # def test_sign_psbt_legacy(client: Client):
 #     # legacy address
 #     # PSBT for a legacy 1-input 1-output spend
@@ -365,18 +415,72 @@ def test_sign_psbt_multisig_wsh(client: Client):
     )]
 
 
-# def test_sign_psbt_legacy_wrong_non_witness_utxo(client: Client):
-#     # legacy address
-#     # PSBT for a legacy 1-input 1-output spend
-#     # The spend is valid, but the non-witness utxo is wrong; therefore, it should fail the hash test
-#     # TODO: this fails PSBT decoding; need to make a version we can control for this test.
+@has_automation("automations/sign_with_wallet_accept.json")
+def test_sign_psbt_multisig_sh_wsh(client: Client):
+    # wrapped segwit multisig ("sh(wsh(sortedmulti(...)))")
+    wallet = MultisigWallet(
+        name="Cold storage",
+        address_type=AddressType.SH_WIT,
+        threshold=2,
+        keys_info=[
+            "[e24243b4/48'/1'/0'/1']tpubDFY2NoEHyYsp4J98UCMAaRT5LzRYeXjWqh2txK2RsxPAR5YWKWyTeZBBncRJ7z5nL5RUQPEgycbgbbmywbeLaH9yWK6rnFAYQn28HyiYc1Y",
+            "[f5acc2fd/48'/1'/0'/1']tpubDFAqEGNyad35YgH8zxvxFZqNUoPtr5mDojs7wzbXQBHTZ4xHeVXG6w2HvsKvjBpaRpTmjYDjdPg5w2c6Wvu8QBkyMDrmBWdCyqkDM7reSsY",
+        ],
+        sorted=True
+    )
 
-#     unsigned_raw_psbt_base64 = "cHNidP8BAFQCAAAAAbUlIwxFfIt0fsuFCNtL3dHKcOvUPQu2CNcqc8FrNtTyAAAAAAD+////AaDwGQAAAAAAGKkU2FZEFTTPb1ZpCw2Oa2sc/FxM59GIrAAAAAAAAQD5AgAAAAABATfphYFskBaL7jbWIkU3K7RS5zKr5BvfNHjec1rNieTrAQAAABcWABTkjiMSrvGNi5KFtSy72CSJolzNDv7///8C/y8bAAAAAAAZdqkU2FZEFTTPb1ZpCw2Oa2sc/FxM59GIrDS2GJ0BAAAAF6kUnEFiBqwsbP0pWpazURx45PGdXkWHAkcwRAIgCxWs2+R6UcpQuD6QKydU0irJ7yNe++5eoOly5VgqrEsCIHUD6t4LNW0292vnP+heXZ6Walx8DRW2TB+IOazzDNcaASEDnQS6zdUebuNm7FuOdKonnlNmPPpUyN66w2CIsX5N+pUySC0BAAA="
-#     psbt = PSBT()
-#     psbt.deserialize(unsigned_raw_psbt_base64)
+    wallet_hmac = bytes.fromhex(
+        "677ec94c2e1a7446c6cac9db2adde8667b9a746dd63fa1e1863553cdb814a54a"
+    )
 
-#     with pytest.raises(IncorrectDataError):
-#         client.sign_psbt(psbt)
+    psbt = "cHNidP8BAFUCAAAAAS60cHn6kIlm2wk314ZKiOok2xj++cPoa/K5TXzNk4s6AQAAAAD9////AescAAAAAAAAGXapFFnK2lAxTIKeGfWneG+O4NSYf0KdiKwhlRUAAAEAigIAAAABAaNw+E0toKUlohxkK0YmapPS7uToo7RG7DA2YLrmoD8BAAAAFxYAFAppBymwQTPq8lpFfFWMuPRNdbTX/v///wI7rUIBAAAAABepFJMyNbbbdF4o3zxQhWSJ5ZXY5naHh60dAAAAAAAAF6kU9wt/XvakFsqnsR6xlBxP5N9MyyqHbvokAAEBIK0dAAAAAAAAF6kU9wt/XvakFsqnsR6xlBxP5N9MyyqHAQQiACAyIOGl/sIPCRep2F4Bude0ME17U2m2dPAiK96XdDCf7wEFR1IhA0fxhNV0BDkMTLzQjBSpKxSeh39pMEcQ+reqlD2a/D20IQPlOZCX7JMMMjUxBLMNtzR+gcVKZaL4J4sf/VRbo03NfFKuIgYDR/GE1XQEOQxMvNCMFKkrFJ6Hf2kwRxD6t6qUPZr8PbQc4kJDtDAAAIABAACAAAAAgAEAAIAAAAAAAAAAACIGA+U5kJfskwwyNTEEsw23NH6BxUplovgnix/9VFujTc18HPWswv0wAACAAQAAgAAAAIABAACAAAAAAAAAAAAAAA=="
+    result = client.sign_psbt(psbt, wallet, wallet_hmac)
+
+    assert result == [(
+        0,
+        PartialSignature(
+            pubkey=bytes.fromhex("03e5399097ec930c32353104b30db7347e81c54a65a2f8278b1ffd545ba34dcd7c"),
+            signature=bytes.fromhex(
+                "30440220689c3ee23b8f52c21abe47ea6f37cf8bc72653cab9cd32658199b1a16db193d802200db5d2157044913d5a60f69e9ce10ab9a9d883d421d3fb0400d948b31c3b7ee201"
+            )
+        )
+    )]
+
+
+@has_automation("automations/sign_with_wallet_missing_nonwitnessutxo_accept.json")
+def test_sign_psbt_multisig_sh_wsh_missing_nonwitnessutxo(client: Client):
+    # A transaction spending a wrapped segwit address has a script that appears like a legacy UTXO, but uses
+    # the segwit sighash algorithm.
+    # Therefore, if the non-witness-utxo is missing, we should still sign it while giving the warning for unverified inputs,
+    # for consistency with other segwit input types.
+
+    wallet = MultisigWallet(
+        name="Cold storage",
+        address_type=AddressType.SH_WIT,
+        threshold=2,
+        keys_info=[
+            "[e24243b4/48'/1'/0'/1']tpubDFY2NoEHyYsp4J98UCMAaRT5LzRYeXjWqh2txK2RsxPAR5YWKWyTeZBBncRJ7z5nL5RUQPEgycbgbbmywbeLaH9yWK6rnFAYQn28HyiYc1Y",
+            "[f5acc2fd/48'/1'/0'/1']tpubDFAqEGNyad35YgH8zxvxFZqNUoPtr5mDojs7wzbXQBHTZ4xHeVXG6w2HvsKvjBpaRpTmjYDjdPg5w2c6Wvu8QBkyMDrmBWdCyqkDM7reSsY",
+        ],
+        sorted=True
+    )
+
+    wallet_hmac = bytes.fromhex(
+        "677ec94c2e1a7446c6cac9db2adde8667b9a746dd63fa1e1863553cdb814a54a"
+    )
+
+    psbt = "cHNidP8BAFUCAAAAAS60cHn6kIlm2wk314ZKiOok2xj++cPoa/K5TXzNk4s6AQAAAAD9////AescAAAAAAAAGXapFFnK2lAxTIKeGfWneG+O4NSYf0KdiKwhlRUAAAEBIK0dAAAAAAAAF6kU9wt/XvakFsqnsR6xlBxP5N9MyyqHAQQiACAyIOGl/sIPCRep2F4Bude0ME17U2m2dPAiK96XdDCf7wEFR1IhA0fxhNV0BDkMTLzQjBSpKxSeh39pMEcQ+reqlD2a/D20IQPlOZCX7JMMMjUxBLMNtzR+gcVKZaL4J4sf/VRbo03NfFKuIgYDR/GE1XQEOQxMvNCMFKkrFJ6Hf2kwRxD6t6qUPZr8PbQc4kJDtDAAAIABAACAAAAAgAEAAIAAAAAAAAAAACIGA+U5kJfskwwyNTEEsw23NH6BxUplovgnix/9VFujTc18HPWswv0wAACAAQAAgAAAAIABAACAAAAAAAAAAAAAAA=="
+    result = client.sign_psbt(psbt, wallet, wallet_hmac)
+
+    assert result == [(
+        0,
+        PartialSignature(
+            pubkey=bytes.fromhex("03e5399097ec930c32353104b30db7347e81c54a65a2f8278b1ffd545ba34dcd7c"),
+            signature=bytes.fromhex(
+                "30440220689c3ee23b8f52c21abe47ea6f37cf8bc72653cab9cd32658199b1a16db193d802200db5d2157044913d5a60f69e9ce10ab9a9d883d421d3fb0400d948b31c3b7ee201"
+            )
+        )
+    )]
 
 
 @has_automation("automations/sign_with_default_wallet_accept.json")
@@ -462,7 +566,8 @@ def test_sign_psbt_taproot_1to2_sighash_default(client: Client):
         assert bip0340.schnorr_verify(sighash0, partial_sig0.pubkey, partial_sig0.signature)
 
 
-def test_sign_psbt_singlesig_wpkh_4to3(client: Client, comm: SpeculosClient, is_speculos: bool):
+def test_sign_psbt_singlesig_wpkh_4to3(client: Client, comm: SpeculosClient, is_speculos: bool,
+                                       model: str):
     # PSBT for a segwit 4-input 3-output spend (1 change address)
     # this test also checks that addresses, amounts and fees shown on screen are correct
 
@@ -501,7 +606,11 @@ def test_sign_psbt_singlesig_wpkh_4to3(client: Client, comm: SpeculosClient, is_
 
     all_events: List[dict] = []
 
-    x = threading.Thread(target=ux_thread_sign_psbt, args=[comm, all_events])
+    if model == "stax":
+        x = threading.Thread(target=ux_thread_sign_psbt_stax, args=[comm, all_events])
+    else:
+        x = threading.Thread(target=ux_thread_sign_psbt, args=[comm, all_events])
+
     x.start()
     result = client.sign_psbt(psbt, wallet, None)
     x.join()
@@ -520,13 +629,15 @@ def test_sign_psbt_singlesig_wpkh_4to3(client: Client, comm: SpeculosClient, is_
             assert ((parsed_events["amounts"][shown_out_idx] == format_amount(CURRENCY_TICKER, out_amt)) or
                     (parsed_events["amounts"][shown_out_idx] == format_amount(CURRENCY_TICKER_ALT, out_amt)))
 
-            out_addr = Script(psbt.tx.vout[out_idx].scriptPubKey).address(network=NETWORKS["test"])
+            out_addr = Script(psbt.tx.vout[out_idx].scriptPubKey).address(
+                network=NETWORKS["test"]).replace('O', '0')  # OCR misreads O for 0
             assert parsed_events["addresses"][shown_out_idx] == out_addr
 
             shown_out_idx += 1
 
 
-def test_sign_psbt_singlesig_large_amount(client: Client, comm: SpeculosClient, is_speculos: bool):
+def test_sign_psbt_singlesig_large_amount(client: Client, comm: SpeculosClient, is_speculos: bool,
+                                          model: str):
     # Test with a transaction with an extremely large amount
 
     if not is_speculos:
@@ -554,7 +665,10 @@ def test_sign_psbt_singlesig_large_amount(client: Client, comm: SpeculosClient, 
 
     all_events: List[dict] = []
 
-    x = threading.Thread(target=ux_thread_sign_psbt, args=[comm, all_events])
+    if model == "stax":
+        x = threading.Thread(target=ux_thread_sign_psbt_stax, args=[comm, all_events])
+    else:
+        x = threading.Thread(target=ux_thread_sign_psbt, args=[comm, all_events])
     x.start()
     result = client.sign_psbt(psbt, wallet, None)
     x.join()
@@ -571,6 +685,7 @@ def test_sign_psbt_singlesig_large_amount(client: Client, comm: SpeculosClient, 
             (parsed_events["amounts"][0] == format_amount(CURRENCY_TICKER_ALT, out_amt)))
 
 
+@pytest.mark.timeout(0)  # disable timeout
 @has_automation("automations/sign_with_default_wallet_accept.json")
 def test_sign_psbt_singlesig_wpkh_512to256(client: Client, enable_slow_tests: bool):
     # PSBT for a transaction with 512 inputs and 256 outputs (maximum currently supported in the app)
@@ -602,9 +717,20 @@ def test_sign_psbt_singlesig_wpkh_512to256(client: Client, enable_slow_tests: bo
     assert len(result) == n_inputs
 
 
-def test_sign_psbt_fail_11_changes(client: Client):
+def ux_thread_acept_prompt_stax(speculos_client: SpeculosClient, all_events: List[dict]):
+    """Completes the signing flow always going right and accepting at the appropriate time, while collecting all the events in all_events."""
+
+    while True:
+        event = speculos_client.get_next_event()
+        all_events.append(event)
+        if "Tap to continue" in event["text"]:
+            speculos_client.finger_touch(55, 550)
+            break
+
+
+def test_sign_psbt_fail_11_changes(client: Client, comm: SpeculosClient, model: str):
     # PSBT for transaction with 11 change addresses; the limit is 10, so it must fail with NotSupportedError
-    # before any user interaction
+    # before any user interaction on nanos.
 
     wallet = WalletPolicy(
         "",
@@ -621,6 +747,12 @@ def test_sign_psbt_fail_11_changes(client: Client):
         [True] * 11,
     )
 
+    all_events: List[dict] = []
+
+    if model == "stax":
+        x = threading.Thread(target=ux_thread_acept_prompt_stax, args=[comm, all_events])
+
+        x.start()
     with pytest.raises(NotSupportedError):
         client.sign_psbt(psbt, wallet, None)
 
@@ -669,6 +801,27 @@ def test_sign_psbt_with_opreturn(client: Client, comm: SpeculosClient):
     )
 
     psbt_b64 = "cHNidP8BAKMCAAAAAZ0gZDu3l28lrZWbtsuoIfI07zpsaXXMe6sMHHJn03LPAAAAAAD+////AgAAAAAAAAAASGpGVGhlIFRpbWVzIDAzL0phbi8yMDA5IENoYW5jZWxsb3Igb24gYnJpbmsgb2Ygc2Vjb25kIGJhaWxvdXQgZm9yIGJhbmtzLsGVmAAAAAAAFgAUK5M/aeXrJEofBL7Uno7J5OyTvJ8AAAAAAAEAcQIAAAABnpp88I3RXEU5b28rI3GGAXaWkk+w1sEqWDXFXdacKg8AAAAAAP7///8CgJaYAAAAAAAWABQTR+gqA3tduzjPjEdZ8kKx9cfgmvNabSkBAAAAFgAUCA6eZPSQK9gnq8ngOSaQ0ZdPeIVBAAAAAQEfgJaYAAAAAAAWABQTR+gqA3tduzjPjEdZ8kKx9cfgmiIGAny3XTSwBcTrn2K78sRX12OOgT51fvzsj6aGd9lQtjZiGPWswv1UAACAAQAAgAAAAIAAAAAAAAAAAAAAIgIDGZuJ2DVvV+HOOAoSBc8oYG2+qJhVsRw9/s+4oaUzVokY9azC/VQAAIABAACAAAAAgAEAAAABAAAAAA=="
+    psbt = PSBT()
+    psbt.deserialize(psbt_b64)
+
+    with automation(comm, "automations/sign_with_default_wallet_accept.json"):
+        hww_sigs = client.sign_psbt(psbt, wallet, None)
+
+    assert len(hww_sigs) == 1
+
+
+def test_sign_psbt_with_naked_opreturn(client: Client, comm: SpeculosClient):
+    wallet = WalletPolicy(
+        "",
+        "wpkh(@0/**)",
+        [
+            "[f5acc2fd/84'/1'/0']tpubDCtKfsNyRhULjZ9XMS4VKKtVcPdVDi8MKUbcSD9MJDyjRu1A2ND5MiipozyyspBT9bg8upEp7a8EAgFxNxXn1d7QkdbL52Ty5jiSLcxPt1P"
+        ],
+    )
+
+    # Same psbt as in test_sign_psbt_with_opreturn, but the first output is a naked OP_RETURN script (no data).
+    # Signing such outputs is needed in BIP-0322.
+    psbt_b64 = "cHNidP8BAFwCAAAAAZ0gZDu3l28lrZWbtsuoIfI07zpsaXXMe6sMHHJn03LPAAAAAAD+////AgAAAAAAAAAAAWrBlZgAAAAAABYAFCuTP2nl6yRKHwS+1J6OyeTsk7yfAAAAAAABAHECAAAAAZ6afPCN0VxFOW9vKyNxhgF2lpJPsNbBKlg1xV3WnCoPAAAAAAD+////AoCWmAAAAAAAFgAUE0foKgN7Xbs4z4xHWfJCsfXH4JrzWm0pAQAAABYAFAgOnmT0kCvYJ6vJ4DkmkNGXT3iFQQAAAAEBH4CWmAAAAAAAFgAUE0foKgN7Xbs4z4xHWfJCsfXH4JoiBgJ8t100sAXE659iu/LEV9djjoE+dX787I+mhnfZULY2Yhj1rML9VAAAgAEAAIAAAACAAAAAAAAAAAAAACICAxmbidg1b1fhzjgKEgXPKGBtvqiYVbEcPf7PuKGlM1aJGPWswv1UAACAAQAAgAAAAIABAAAAAQAAAAA="
     psbt = PSBT()
     psbt.deserialize(psbt_b64)
 

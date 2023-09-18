@@ -6,6 +6,7 @@
 #include "common/bip32.h"
 #include "common/buffer.h"
 #include "../constants.h"
+#include "../crypto.h"
 
 #ifndef SKIP_FOR_CMOCKA
 #include "os.h"
@@ -80,7 +81,7 @@ typedef struct {
     uint8_t master_key_derivation_len;
     uint8_t has_key_origin;
     uint8_t has_wildcard;  // true iff the keys ends with the wildcard (/ followed by **)
-    char ext_pubkey[MAX_SERIALIZED_PUBKEY_LENGTH + 1];
+    serialized_extended_pubkey_t ext_pubkey;
 } policy_map_key_info_t;
 
 typedef struct {
@@ -383,7 +384,7 @@ int parse_policy_map_key_info(buffer_t *buffer, policy_map_key_info_t *out, int 
  * When parsing descriptors containing miniscript, this fails if the miniscript is not correct,
  * as defined by the miniscript type system.
  * This does NOT check non-malleability of the miniscript.
- * * @param in_buf the buffer containing the policy map to parse
+ * @param in_buf the buffer containing the policy map to parse
  * @param out the pointer to the output buffer, which must be 4-byte aligned
  * @param out_len the length of the output buffer
  * @param version either WALLET_POLICY_VERSION_V1 or WALLET_POLICY_VERSION_V2
@@ -391,6 +392,17 @@ int parse_policy_map_key_info(buffer_t *buffer, policy_map_key_info_t *out, int 
  * output buffer is too small.
  */
 int parse_descriptor_template(buffer_t *in_buf, void *out, size_t out_len, int version);
+
+/**
+ * Given a valid policy that the bitcoin app is able to sign, returns the segwit version.
+ * The result is undefined for a node that is not a valid root of a wallet policy that the bitcoin
+ * app is able to sign.
+ *
+ * @param policy the root node of the wallet policy
+ * @return -1 if it's a legacy policy, 0 if it is a policy for SegwitV0 (possibly nested), 1 for
+ * SegwitV1 (taproot).
+ */
+int get_policy_segwit_version(const policy_node_t *policy);
 
 /**
  * Computes additional properties of the given miniscript, to detect malleability and other security

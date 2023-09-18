@@ -83,12 +83,8 @@ def run_test_e2e(wallet_policy: WalletPolicy, core_wallet_names: List[str], rpc:
     result = multisig_rpc.walletcreatefundedpsbt(
         outputs={
             out_address: Decimal("0.01")
-        },
-        options={
-            # make sure that the fee is large enough; it looks like
-            # fee estimation doesn't work in core with miniscript, yet
-            "fee_rate": 10
-        })
+        }
+    )
 
     psbt_b64 = result["psbt"]
 
@@ -279,6 +275,36 @@ def test_e2e_miniscript_me_or_3of5(rpc, rpc_test_wallet, client: Client, speculo
     run_test_e2e(wallet_policy, [], rpc, rpc_test_wallet, client, speculos_globals, comm)
 
 
+def test_e2e_miniscript_me_large_vault(rpc, rpc_test_wallet, client: Client, speculos_globals: SpeculosGlobals, comm: Union[TransportClient, SpeculosClient], model: str):
+    if (model == "nanos"):
+        pytest.skip("Not supported on Nano S due to memory limitations")
+
+    path = "48'/1'/0'/2'"
+    _, core_xpub_orig1 = create_new_wallet()
+    _, core_xpub_orig2 = create_new_wallet()
+    _, core_xpub_orig3 = create_new_wallet()
+    _, core_xpub_orig4 = create_new_wallet()
+    _, core_xpub_orig5 = create_new_wallet()
+    _, core_xpub_orig6 = create_new_wallet()
+    internal_xpub = get_internal_xpub(speculos_globals.seed, path)
+    internal_xpub_orig = f"[{speculos_globals.master_key_fingerprint.hex()}/{path}]{internal_xpub}"
+
+    wallet_policy = WalletPolicy(
+        name="Large vault",
+        descriptor_template="wsh(or_d(pk(@0/**),andor(thresh(1,utv:thresh(1,pkh(@1/**),a:pkh(@2/**)),autv:thresh(1,pkh(@3/**),a:pkh(@4/**))),after(1685577600),and_v(v:and_v(v:pkh(@5/**),thresh(1,pkh(@6/**))),after(1685318400)))))",
+        keys_info=[
+            internal_xpub_orig,
+            f"{core_xpub_orig1}",
+            f"{core_xpub_orig2}",
+            f"{core_xpub_orig3}",
+            f"{core_xpub_orig4}",
+            f"{core_xpub_orig5}",
+            f"{core_xpub_orig6}",
+        ])
+
+    run_test_e2e(wallet_policy, [], rpc, rpc_test_wallet, client, speculos_globals, comm)
+
+
 def test_e2e_miniscript_me_and_bob_or_me_and_carl_1(rpc, rpc_test_wallet, client: Client, speculos_globals: SpeculosGlobals, comm: Union[TransportClient, SpeculosClient]):
     # policy: or(and(pk(A1), pk(B)),and(pk(A2), pk(C)))
     # where A1 and A2 are both internal keys; therefore, two signatures per input must be returned
@@ -306,27 +332,32 @@ def test_e2e_miniscript_me_and_bob_or_me_and_carl_1(rpc, rpc_test_wallet, client
     run_test_e2e(wallet_policy, [core_wallet_name1], rpc, rpc_test_wallet, client, speculos_globals, comm)
 
 
-def test_e2e_miniscript_me_and_bob_or_me_and_carl_2(rpc, rpc_test_wallet, client: Client, speculos_globals: SpeculosGlobals, comm: Union[TransportClient, SpeculosClient]):
-    # same as the previous example, but uses the same xpubs with two different paths for the internal keys,
-    # by using the /<M,N>/* notation instead of different internal xpubs
+def test_e2e_miniscript_policy_with_a(rpc, rpc_test_wallet, client: Client, speculos_globals: SpeculosGlobals, comm: Union[TransportClient, SpeculosClient]):
+    # versions 2.1.0 and 2.1.1 of the app incorrectly compiled the 'a:' wrapper, producing incorrect addresses
 
-    core_wallet_name1, core_xpub_orig1 = create_new_wallet()
+    _, core_xpub_orig1 = create_new_wallet()
     _, core_xpub_orig2 = create_new_wallet()
+    core_wallet_name3, core_xpub_orig3 = create_new_wallet()
+    _, core_xpub_orig4 = create_new_wallet()
+    _, core_xpub_orig5 = create_new_wallet()
 
-    path = "44'/1'/0'"
+    path = "48'/1'/0'/2'"
     internal_xpub = get_internal_xpub(speculos_globals.seed, path)
     internal_xpub_orig = f"[{speculos_globals.master_key_fingerprint.hex()}/{path}]{internal_xpub}"
 
     wallet_policy = WalletPolicy(
-        name="Me and Bob or me and Carl",
-        descriptor_template="wsh(c:andor(pk(@0/<0;1>/*),pk_k(@1/**),and_v(v:pk(@0/<2;3>/*),pk_k(@2/**))))",
+        name="Policy with a:",
+        descriptor_template="wsh(or_i(and_v(v:pkh(@0/**),older(65535)),or_d(multi(2,@1/**,@3/**),and_v(v:thresh(1,pkh(@4/**),a:pkh(@5/**)),older(64231)))))",
         keys_info=[
-            internal_xpub_orig,
             f"{core_xpub_orig1}",
+            internal_xpub_orig,
             f"{core_xpub_orig2}",
+            f"{core_xpub_orig3}",
+            f"{core_xpub_orig4}",
+            f"{core_xpub_orig5}",
         ])
 
-    run_test_e2e(wallet_policy, [core_wallet_name1], rpc, rpc_test_wallet, client, speculos_globals, comm)
+    run_test_e2e(wallet_policy, [core_wallet_name3], rpc, rpc_test_wallet, client, speculos_globals, comm)
 
 
 def test_invalid_miniscript(rpc, client: Client, speculos_globals: SpeculosGlobals):
