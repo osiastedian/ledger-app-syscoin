@@ -59,6 +59,6 @@
     "sass": "^1.60.0",
     "sass-loader": "^13.2.1",
     "satoshi-bitcoin": "^1.0.5",
-    "syscoinjs-lib": "^1.0.214"
+    "syscoinjs-lib": "^1.0.218"
   }
 }
