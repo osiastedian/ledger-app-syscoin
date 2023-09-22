@@ -44,7 +44,7 @@ VARIANT_VALUES = syscoin_regtest syscoin
 
 # simplify for tests
 ifndef COIN
-COIN=syscoin
+COIN=syscoin_regtest
 endif
 
 ########################################
