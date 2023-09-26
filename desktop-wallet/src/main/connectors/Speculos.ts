@@ -3,7 +3,7 @@ import SpeculosTransport from "@ledgerhq/hw-transport-node-speculos-http";
 import { DisconnectedDevice } from "@ledgerhq/errors";
 
 const opts = {
-  baseURL: "http://localhost:5002",
+  baseURL: "http://127.0.0.1:5002",
 };
 const axiosInstance = axios.create(opts);
 const speculosTransport = new SpeculosTransport(axiosInstance, opts);

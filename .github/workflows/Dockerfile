@@ -41,4 +41,4 @@ ENV PATH=/syscoin-${SYSCOIN_VERSION}/bin:$PATH
 
 EXPOSE 8369 8370 18369 18370 18443 18444 38332 38333
 
-RUN syscoind -version | grep "Syscoin Core version v${SYSCOIN_VERSION}"
+# RUN syscoind -version | grep "Syscoin Core version v${SYSCOIN_VERSION}"

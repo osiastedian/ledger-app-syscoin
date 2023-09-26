@@ -13,3 +13,16 @@ services:
       - "41000:41000" # vnc
     command: "--model nanox ./apps/syscoin.elf --seed secret --display headless --apdu-port 40000 --vnc-port 41000 --api-port 5002"
     # Add `--vnc-password "<password>"` for macos users to use built-in vnc client.
+
+  stax:
+    build: .github/workflows
+    # image: syscoin-speculos
+    volumes:
+      - ./src:/speculos/src
+      - ./build/stax/bin/app.elf:/speculos/apps/syscoin.elf
+    ports:
+      - "5004:5000" # api
+      - "40004:40004" # apdu
+    entrypoint:  ["python", "./speculos.py"]
+    command: "--model stax ./apps/syscoin.elf --seed secret --display headless --api-port 5000"
+    # Add `--vnc-password "<password>"` for macos users to use built-in vnc client.

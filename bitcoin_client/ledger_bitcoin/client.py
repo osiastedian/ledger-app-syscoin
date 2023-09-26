@@ -3,7 +3,7 @@ from typing import Tuple, List, Mapping, Optional, Union
 import base64
 from io import BytesIO, BufferedReader
 
-from bitcoin_client.ledger_bitcoin.errors import UnknownDeviceError
+from .bip380.descriptors import Descriptor
 
 from .command_builder import BitcoinCommandBuilder, BitcoinInsType
 from .common import Chain, read_uint, read_varint
@@ -11,9 +11,11 @@ from .client_command import ClientCommandInterpreter
 from .client_base import Client, TransportClient, PartialSignature
 from .client_legacy import LegacyClient
 from .exception import DeviceException
+from .errors import UnknownDeviceError
 from .merkle import get_merkleized_map_commitment
 from .wallet import WalletPolicy, WalletType
 from .psbt import PSBT, normalize_psbt
+from . import segwit_addr
 from ._serialize import deser_string
 
 
@@ -109,6 +111,13 @@ class NewClient(Client):
         wallet_id = response[0:32]
         wallet_hmac = response[32:64]
 
+        if self._should_validate_address(wallet):
+            # sanity check: for miniscripts, derive the first address independently with python-bip380
+            first_addr_device = self.get_wallet_address(wallet, wallet_hmac, 0, 0, False)
+
+            if first_addr_device != self._derive_segwit_address_for_policy(wallet, False, 0):
+                raise RuntimeError("Invalid address. Please update your Bitcoin app. If the problem persists, report a bug at https://github.com/LedgerHQ/app-bitcoin-new")
+
         return wallet_id, wallet_hmac
 
     def get_wallet_address(
@@ -143,9 +152,18 @@ class NewClient(Client):
         if sw != 0x9000:
             raise DeviceException(error_code=sw, ins=BitcoinInsType.GET_WALLET_ADDRESS)
 
-        return response.decode()
+        result = response.decode()
+
+        if self._should_validate_address(wallet):
+            # sanity check: for miniscripts, derive the address independently with python-bip380
+
+            if result != self._derive_segwit_address_for_policy(wallet, change, address_index):
+                raise RuntimeError("Invalid address. Please update your Bitcoin app. If the problem persists, report a bug at https://github.com/LedgerHQ/app-bitcoin-new")
+
+        return result
 
     def sign_psbt(self, psbt: Union[PSBT, bytes, str], wallet: WalletPolicy, wallet_hmac: Optional[bytes]) -> List[Tuple[int, PartialSignature]]:
+
         psbt = normalize_psbt(psbt)
 
         if psbt.version != 2:
@@ -252,6 +270,19 @@ class NewClient(Client):
             raise DeviceException(error_code=sw, ins=BitcoinInsType.SIGN_MESSAGE)
 
         return base64.b64encode(response).decode('utf-8')
+
+    def _should_validate_address(self, wallet: WalletPolicy) -> bool:
+        # TODO: extend to taproot miniscripts once supported
+        return wallet.descriptor_template.startswith("wsh(") and not wallet.descriptor_template.startswith("wsh(sortedmulti(")
+
+    def _derive_segwit_address_for_policy(self, wallet: WalletPolicy, change: bool, address_index: int) -> bool:
+        desc = Descriptor.from_str(wallet.get_descriptor(change))
+        desc.derive(address_index)
+        spk = desc.script_pubkey
+        if spk[0:2] != b'\x00\x20' or len(spk) != 34:
+            raise RuntimeError("Invalid scriptPubKey")
+        hrp = "bc" if self.chain == Chain.MAIN else "tb"
+        return segwit_addr.encode(hrp, 0, spk[2:])
 
 
 def createClient(comm_client: Optional[TransportClient] = None, chain: Chain = Chain.MAIN, debug: bool = False) -> Union[LegacyClient, NewClient]:

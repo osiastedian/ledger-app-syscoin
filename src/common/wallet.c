@@ -2,6 +2,7 @@
 #include <string.h>
 #include <limits.h>
 
+#include "../common/base58.h"
 #include "../common/bip32.h"
 #include "../common/buffer.h"
 #include "../common/script.h"
@@ -358,19 +359,40 @@ int parse_policy_map_key_info(buffer_t *buffer, policy_map_key_info_t *out, int 
 
     // consume the rest of the buffer into the pubkey, except possibly the final "/**"
     unsigned int ext_pubkey_len = 0;
+    char ext_pubkey_str[MAX_SERIALIZED_PUBKEY_LENGTH];
     uint8_t c;
     while (ext_pubkey_len < MAX_SERIALIZED_PUBKEY_LENGTH && buffer_peek(buffer, &c) &&
            is_alphanumeric(c)) {
-        out->ext_pubkey[ext_pubkey_len] = c;
+        ext_pubkey_str[ext_pubkey_len] = c;
         ++ext_pubkey_len;
         buffer_seek_cur(buffer, 1);
     }
-    out->ext_pubkey[ext_pubkey_len] = '\0';
+    ext_pubkey_str[ext_pubkey_len] = '\0';
 
     if (ext_pubkey_len < 111 || ext_pubkey_len > 112) {
         // loose sanity check; pubkeys in bitcoin can be 111 or 112 characters long
         return WITH_ERROR(-1, "Invalid extended pubkey length");
     }
+
+    serialized_extended_pubkey_check_t ext_pubkey_check;
+    if (base58_decode(ext_pubkey_str,
+                      ext_pubkey_len,
+                      (uint8_t *) &ext_pubkey_check,
+                      sizeof(ext_pubkey_check)) < 0) {
+        return WITH_ERROR(-1, "Error decoding serialized extended pubkey");
+    }
+
+    // verify checksum
+    uint8_t checksum[4];
+    crypto_get_checksum((uint8_t *) &ext_pubkey_check.serialized_extended_pubkey,
+                        sizeof(ext_pubkey_check.serialized_extended_pubkey),
+                        checksum);
+
+    if (memcmp(&ext_pubkey_check.checksum, checksum, sizeof(checksum)) != 0) {
+        return WITH_ERROR(-1, "Wrong extended pubkey checksum");
+    }
+
+    out->ext_pubkey = ext_pubkey_check.serialized_extended_pubkey;
 
     // either the string terminates now, or it has a final "/**" suffix for the wildcard.
     if (!buffer_can_read(buffer, 1)) {
@@ -988,7 +1010,7 @@ static int parse_script(buffer_t *in_buf,
                 return WITH_ERROR(-1, "children of and_n must be miniscript");
             }
 
-            // and_n(X, Y) is equivalent to andor(X, Y, 1)
+            // and_n(X, Y) is equivalent to andor(X, Y, 0)
             // X is Bdu; Y is B
 
             const policy_node_t *X = resolve_node_ptr(&node->scripts[0]);
@@ -1118,7 +1140,7 @@ static int parse_script(buffer_t *in_buf,
             node->base.flags.is_miniscript = 1;
             node->base.flags.miniscript_type = MINISCRIPT_TYPE_V;
             node->base.flags.miniscript_mod_z = X->flags.miniscript_mod_z & Z->flags.miniscript_mod_z;
-            node->base.flags.miniscript_mod_o = X->flags.miniscript_mod_o & Z->flags.miniscript_mod_o;
+            node->base.flags.miniscript_mod_o = X->flags.miniscript_mod_o & Z->flags.miniscript_mod_z;
             node->base.flags.miniscript_mod_n = 0;
             node->base.flags.miniscript_mod_d = 0;
             node->base.flags.miniscript_mod_u = 0;
@@ -1343,8 +1365,8 @@ static int parse_script(buffer_t *in_buf,
             node->base.flags.miniscript_mod_z = (count_z == node->n) ? 1 : 0;
             node->base.flags.miniscript_mod_o = (count_z == node->n - 1 && count_o == 1) ? 1 : 0;
             node->base.flags.miniscript_mod_n = 0;
-            node->base.flags.miniscript_mod_d = 0;
-            node->base.flags.miniscript_mod_u = 0;
+            node->base.flags.miniscript_mod_d = 1;
+            node->base.flags.miniscript_mod_u = 1;
             // clang-format on
 
             break;
@@ -1874,6 +1896,24 @@ int parse_descriptor_template(buffer_t *in_buf, void *out, size_t out_len, int v
     buffer_t out_buf = buffer_create(out, out_len);
 
     return parse_script(in_buf, &out_buf, version, 0, 0);
+}
+
+int get_policy_segwit_version(const policy_node_t *policy) {
+    if (policy->type == TOKEN_TR) {
+        return 1;
+    } else if (policy->type == TOKEN_SH) {
+        const policy_node_t *inner =
+            resolve_node_ptr(&((const policy_node_with_script_t *) policy)->script);
+        if (inner->type == TOKEN_WPKH || inner->type == TOKEN_WSH) {
+            return 0;  // wrapped segwit
+        } else {
+            return -1;  // legacy
+        }
+    } else if (policy->type == TOKEN_WPKH || policy->type == TOKEN_WSH) {
+        return 0;  // native segwit
+    } else {
+        return -1;  // legacy
+    }
 }
 
 /**

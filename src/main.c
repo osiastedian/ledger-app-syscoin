@@ -45,17 +45,9 @@
 #include "swap/handle_get_printable_amount.h"
 #include "swap/handle_check_address.h"
 
-// we don't import main_old.h in legacy-only mode, but we still need libargs_s; will refactor later
-struct libargs_s {
-    unsigned int id;
-    unsigned int command;
-    void *unused;  // it used to be the coin_config; unused in the new app
-    union {
-        check_address_parameters_t *check_address;
-        create_transaction_parameters_t *create_transaction;
-        get_printable_amount_parameters_t *get_printable_amount;
-    };
-};
+#ifdef HAVE_NBGL
+#include "nbgl_use_case.h"
+#endif
 
 #ifdef HAVE_BOLOS_APP_STACK_CANARY
 extern unsigned int app_stack_canary;
@@ -163,7 +155,8 @@ void app_main() {
                         &cmd);
 
         if (G_swap_state.called_from_swap && G_swap_state.should_exit) {
-            os_sched_exit(0);
+            // Bitcoin app will keep listening as long as it does not receive a valid TX
+            finalize_exchange_sign_transaction(true);
         }
     }
 }
@@ -223,10 +216,10 @@ void coin_main() {
             TRY {
                 io_seproxyhal_init();
 
-#ifdef TARGET_NANOX
+#ifdef HAVE_BLE
                 // grab the current plane mode setting
                 G_io_app.plane_mode = os_setting_get(OS_SETTING_PLANEMODE, NULL, 0);
-#endif  // TARGET_NANOX
+#endif  // HAVE_BLE
 
                 USB_power(0);
                 USB_power(1);
@@ -257,7 +250,7 @@ void coin_main() {
     app_exit();
 }
 
-static void swap_library_main_helper(struct libargs_s *args) {
+static void swap_library_main_helper(libargs_t *args) {
     check_api_level(CX_COMPAT_APILEVEL);
     PRINTF("Inside a library \n");
     switch (args->command) {
@@ -278,19 +271,21 @@ static void swap_library_main_helper(struct libargs_s *args) {
 
                 io_seproxyhal_init();
                 UX_INIT();
+#ifdef HAVE_BAGL
                 ux_stack_push();
+#elif defined(HAVE_NBGL)
+                nbgl_useCaseSpinner("Signing");
+#endif  // HAVE_BAGL
 
                 USB_power(0);
                 USB_power(1);
                 // ui_idle();
                 PRINTF("USB power ON/OFF\n");
-#ifdef TARGET_NANOX
+#ifdef HAVE_BLE
                 // grab the current plane mode setting
                 G_io_app.plane_mode = os_setting_get(OS_SETTING_PLANEMODE, NULL, 0);
-#endif  // TARGET_NANOX
-#ifdef HAVE_BLE
                 BLE_power(0, NULL);
-                BLE_power(1, "Nano X");
+                BLE_power(1, NULL);
 #endif  // HAVE_BLE
                 app_main();
             }
@@ -308,7 +303,7 @@ static void swap_library_main_helper(struct libargs_s *args) {
     }
 }
 
-void swap_library_main(struct libargs_s *args) {
+void swap_library_main(libargs_t *args) {
     bool end = false;
     /* This loop ensures that swap_library_main_helper and os_lib_end are called
      * within a try context, even if an exception is thrown */
@@ -342,7 +337,7 @@ __attribute__((section(".boot"))) int main(int arg0) {
     }
 
     // Application launched as library (for swap support)
-    struct libargs_s *args = (struct libargs_s *) arg0;
+    libargs_t *args = (libargs_t *) arg0;
     if (args->id != 0x100) {
         app_exit();
         return 0;
