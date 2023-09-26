@@ -38,12 +38,12 @@ static void exit(void) {
 }
 
 void ui_menu_main_flow_bitcoin(void) {
-    nbgl_useCaseHome("Syscoin", &C_Bitcoin_64px, NULL, false, ui_menu_about, exit);
+    nbgl_useCaseHome("Syscoin", &C_Syscoin_64px, NULL, false, ui_menu_about, exit);
 }
 
 void ui_menu_main_flow_bitcoin_testnet(void) {
     nbgl_useCaseHome("Syscoin Test",
-                     &C_Bitcoin_64px,
+                     &C_Syscoin_64px,
                      "This app enables signing\ntransactions on all the Syscoin\ntest networks.",
                      false,
                      ui_menu_about,

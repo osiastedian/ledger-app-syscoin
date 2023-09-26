@@ -107,7 +107,7 @@ static void transaction_confirm_callback(int token, uint8_t index) {
 static void continue_light_notify_callback(void) {
     transactionContext.tagValueList.pairs = transactionContext.tagValuePair;
 
-    transactionContext.infoLongPress.icon = &C_Bitcoin_64px;
+    transactionContext.infoLongPress.icon = &C_Syscoin_64px;
     transactionContext.infoLongPress.longPressText = "Approve";
     transactionContext.infoLongPress.longPressToken = CONFIRM_TOKEN;
     transactionContext.infoLongPress.tuneId = TUNE_TAP_CASUAL;
@@ -122,7 +122,7 @@ static void continue_light_notify_callback(void) {
 static void continue_light_processing_callback(void) {
     transactionContext.tagValueList.pairs = transactionContext.tagValuePair;
 
-    transactionContext.infoLongPress.icon = &C_Bitcoin_64px;
+    transactionContext.infoLongPress.icon = &C_Syscoin_64px;
     transactionContext.infoLongPress.longPressText = "Approve";
     transactionContext.infoLongPress.longPressToken = CONFIRM_TOKEN;
     transactionContext.infoLongPress.tuneId = TUNE_TAP_CASUAL;
@@ -137,7 +137,7 @@ static void continue_light_processing_callback(void) {
 static void continue_callback(void) {
     transactionContext.tagValueList.pairs = transactionContext.tagValuePair;
 
-    transactionContext.infoLongPress.icon = &C_Bitcoin_64px;
+    transactionContext.infoLongPress.icon = &C_Syscoin_64px;
     transactionContext.infoLongPress.longPressText = "Approve";
     transactionContext.infoLongPress.longPressToken = CONFIRM_TOKEN;
     transactionContext.infoLongPress.tuneId = TUNE_TAP_CASUAL;
@@ -170,7 +170,7 @@ static void transaction_confirm(int token, uint8_t index) {
                                           .tuneId = TUNE_TAP_CASUAL};
 
         nbgl_pageContent_t content = {.type = INFO_LONG_PRESS,
-                                      .infoLongPress.icon = &C_Bitcoin_64px,
+                                      .infoLongPress.icon = &C_Syscoin_64px,
                                       .infoLongPress.text = transactionContext.confirm,
                                       .infoLongPress.longPressText = "Hold to sign",
                                       .infoLongPress.longPressToken = CONFIRM_TOKEN,
@@ -227,7 +227,7 @@ void ui_display_transaction_prompt(const int external_outputs_total_count) {
 
     transactionContext.rejected_status = "Transaction rejected";
 
-    nbgl_useCaseReviewStart(&C_Bitcoin_64px,
+    nbgl_useCaseReviewStart(&C_Syscoin_64px,
                             "Review transaction\nto send Bitcoin",
                             "",
                             "Reject transaction",
@@ -309,7 +309,7 @@ void ui_display_pubkey_flow(void) {
     transactionContext.confirmed_status = "PUBLIC KEY\nAPPROVED";
     transactionContext.rejected_status = "Public key rejected";
 
-    nbgl_useCaseReviewStart(&C_Bitcoin_64px,
+    nbgl_useCaseReviewStart(&C_Syscoin_64px,
                             "Confirm public key",
                             "",
                             "Cancel",
@@ -330,7 +330,7 @@ void ui_display_receive_in_wallet_flow(void) {
     transactionContext.confirmed_status = "ADDRESS\nCONFIRMED";
     transactionContext.rejected_status = "Address rejected";
 
-    nbgl_useCaseReviewStart(&C_Bitcoin_64px,
+    nbgl_useCaseReviewStart(&C_Syscoin_64px,
                             "Receive\nin known wallet",
                             "",
                             "Cancel",
@@ -351,7 +351,7 @@ void ui_display_policy_map_cosigner_pubkey_flow(void) {
     transactionContext.confirmed_status = "COSIGNER\nREGISTERED";
     transactionContext.rejected_status = "Cosigner rejected";
 
-    nbgl_useCaseReviewStart(&C_Bitcoin_64px,
+    nbgl_useCaseReviewStart(&C_Syscoin_64px,
                             "Register cosigner",
                             "",
                             "Cancel",
@@ -380,7 +380,7 @@ void ui_display_pubkey_suspicious_flow(void) {
     transactionContext.confirm = "Approve public key";
     transactionContext.confirmed_status = "PUBLIC KEY\nAPPROVED";
     transactionContext.rejected_status = "Public key rejected";
-    nbgl_useCaseReviewStart(&C_Bitcoin_64px,
+    nbgl_useCaseReviewStart(&C_Syscoin_64px,
                             "Confirm public key",
                             "",
                             "Cancel",
@@ -402,7 +402,7 @@ void ui_display_register_wallet_flow(void) {
     transactionContext.confirmed_status = "WALLET\nREGISTERED";
     transactionContext.rejected_status = "Wallet rejected";
 
-    nbgl_useCaseReviewStart(&C_Bitcoin_64px,
+    nbgl_useCaseReviewStart(&C_Syscoin_64px,
                             "Register wallet",
                             "",
                             "Cancel",
@@ -424,7 +424,7 @@ void ui_sign_message_flow(void) {
     transactionContext.confirmed_status = "MESSAGE\nSIGNED";
     transactionContext.rejected_status = "Message rejected";
 
-    nbgl_useCaseReviewStart(&C_Bitcoin_64px,
+    nbgl_useCaseReviewStart(&C_Syscoin_64px,
                             "Confirm signature",
                             "",
                             "Cancel",
@@ -442,7 +442,7 @@ void ui_display_spend_from_wallet_flow(void) {
     transactionContext.confirmed_status = "WALLET NAME\nCONFIRMED";
     transactionContext.rejected_status = "Wallet name rejected";
 
-    nbgl_useCaseReviewStart(&C_Bitcoin_64px,
+    nbgl_useCaseReviewStart(&C_Syscoin_64px,
                             "Spend from\nknown wallet",
                             "",
                             "Cancel",
@@ -460,7 +460,7 @@ void ui_display_default_wallet_address_flow(void) {
     transactionContext.confirmed_status = "ADDRESS\nVERIFIED";
     transactionContext.rejected_status = "Address verification\ncancelled";
 
-    nbgl_useCaseReviewStart(&C_Bitcoin_64px,
+    nbgl_useCaseReviewStart(&C_Syscoin_64px,
                             "Verify Bitcoin\naddress",
                             "",
                             "Cancel",
