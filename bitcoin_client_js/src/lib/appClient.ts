@@ -421,13 +421,13 @@ export class AppClient {
       throw new Error('Invalid address index');
     const appAndVer = await this.getAppAndVersion();
     let network;
-    if (appAndVer.name === 'Syscoin Regtest') {
+    if (appAndVer.name === 'Syscoin Test') {
       network = networks.testnet;
     } else if (appAndVer.name === 'Syscoin') {
       network = networks.bitcoin;
     } else {
       throw new Error(
-        `Invalid network: ${appAndVer.name}. Expected 'Syscoin Regtest' or 'Syscoin'.`
+        `Invalid network: ${appAndVer.name}. Expected 'Syscoin Test' or 'Syscoin'.`
       );
     }
     let expression = walletPolicy.descriptorTemplate;

@@ -130,7 +130,7 @@ describe("test AppClient", () => {
 
   it("can retrieve the app's version", async () => {
     const result = await app.getAppAndVersion();
-    expect(result.name).toEqual('Syscoin Regtest');
+    expect(result.name).toEqual('Syscoin Test');
     expect(result.version.split(".")[0]).toEqual("2")
   });
 

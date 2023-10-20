@@ -35,12 +35,12 @@ It is possible to run the app and the library with the [speculos](https://github
 ⚠️ Currently, speculos does not correctly emulate the version of the app, always returning a dummy value; in order to use the library, it is necessary to set the `SPECULOS_APPNAME` environment variable before starting speculos, for example with:
 
 ```
-$ export SPECULOS_APPNAME="Syscoin Regtest:2.1.0"
+$ export SPECULOS_APPNAME="Syscoin Test:2.1.0"
 ```
 
 Similarly, to test the library behavior on a legacy version of the app, one can set the version to `1.6.5` (the final version of the 1.X series).
 
-The expected application name is `Syscoin` for mainnet, `Syscoin Regtest` for testnet.
+The expected application name is `Syscoin` for mainnet, `Syscoin Test` for testnet.
 
 ### Example
 

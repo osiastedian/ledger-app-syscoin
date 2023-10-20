@@ -41,7 +41,7 @@ jobs:
         run: |
           make DEBUG=0 COIN=syscoin BOLOS_SDK=${{ matrix.SDK }} && mv bin/ syscoin-bin/
           make clean
-          make DEBUG=0 COIN=syscoin_regtest BOLOS_SDK=${{ matrix.SDK }} && mv bin/ syscoin-testnet-bin/
+          make DEBUG=0 COIN=syscoin_test BOLOS_SDK=${{ matrix.SDK }} && mv bin/ syscoin-testnet-bin/
       - name: Upload Syscoin app binary
         uses: actions/upload-artifact@v2
         with:

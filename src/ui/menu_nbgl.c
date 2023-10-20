@@ -42,7 +42,7 @@ void ui_menu_main_flow_bitcoin(void) {
 }
 
 void ui_menu_main_flow_bitcoin_testnet(void) {
-    nbgl_useCaseHome("Syscoin Regtest",
+    nbgl_useCaseHome("Syscoin Test",
                      &C_Syscoin_64px,
                      "This app enables signing\ntransactions on all the Syscoin\ntest networks.",
                      false,
@@ -55,6 +55,6 @@ void ui_menu_about(void) {
 }
 
 void ui_menu_about_testnet(void) {
-    nbgl_useCaseSettings("Syscoin Regtest", 0, 1, false, ui_menu_main, navigation_cb, NULL);
+    nbgl_useCaseSettings("Syscoin Test", 0, 1, false, ui_menu_main, navigation_cb, NULL);
 }
 #endif  // HAVE_NBGL

@@ -40,11 +40,11 @@ APP_STACK_SIZE = 3072
 
 # Setting to allow building variant applications
 VARIANT_PARAM = COIN
-VARIANT_VALUES = syscoin_regtest syscoin
+VARIANT_VALUES = syscoin_test syscoin
 COIN=syscoin
 # simplify for tests
 ifndef COIN
-COIN=syscoin_regtest
+COIN=syscoin_test
 endif
 
 ########################################
@@ -55,7 +55,7 @@ HAVE_APPLICATION_FLAG_GLOBAL_PIN = 1
 HAVE_APPLICATION_FLAG_BOLOS_SETTINGS = 1
 HAVE_APPLICATION_FLAG_LIBRARY = 1
 
-ifeq ($(COIN),syscoin_regtest)
+ifeq ($(COIN),syscoin_test)
 
 # Syscoin testnet, no legacy support
 DEFINES   += BIP32_PUBKEY_VERSION=0x043587CF
@@ -65,7 +65,7 @@ DEFINES   += COIN_P2SH_VERSION=196
 DEFINES   += COIN_NATIVE_SEGWIT_PREFIX=\"tb\"
 DEFINES   += COIN_COINID_SHORT=\"TEST\"
 
-APPNAME = "Syscoin Regtest"
+APPNAME = "Syscoin Test"
 
 else ifeq ($(COIN),syscoin)
 
@@ -83,7 +83,7 @@ PATH_APP_LOAD_PARAMS = "44'/57'" "45'/57'" "84'/57'" "86'/57'"
 
 else
 ifeq ($(filter clean,$(MAKECMDGOALS)),)
-$(error Unsupported COIN - use syscoin_regtest, syscoin)
+$(error Unsupported COIN - use syscoin_test, syscoin)
 endif
 endif
 

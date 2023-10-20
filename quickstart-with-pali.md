@@ -8,7 +8,7 @@
 
 2. Download, install, and run [Docker](https://www.docker.com/).
 
-   2.1 Replace the variable `COIN` value in the Makefile with "syscoin" by updating `#ifndef COIN` in the Makefile from "syscoin_regtest."
+   2.1 Replace the variable `COIN` value in the Makefile with "syscoin" by updating `#ifndef COIN` in the Makefile from "syscoin_test."
 
 3. Install `virtualenv` with Python globally by running the following command:
 
