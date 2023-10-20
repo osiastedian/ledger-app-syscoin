@@ -27,7 +27,7 @@ include $(BOLOS_SDK)/Makefile.defines
 CURVE_APP_LOAD_PARAMS = secp256k1
 
 # Application allowed derivation paths.
-PATH_APP_LOAD_PARAMS = ""
+PATH_APP_LOAD_PARAMS = "44'/1'" "45'/1'" "/84'/1'" "/86'/1'"
 APP_LOAD_PARAMS += --path_slip21 "LEDGER-Wallet policy"
 
 # Application version
@@ -79,6 +79,7 @@ DEFINES   += COIN_NATIVE_SEGWIT_PREFIX=\"sys\"
 DEFINES   += COIN_COINID_SHORT=\"SYS\"
 
 APPNAME = "Syscoin"
+PATH_APP_LOAD_PARAMS = "44'/57'" "45'/57'" "/84'/57'" "/86'/57'"
 
 else
 ifeq ($(filter clean,$(MAKECMDGOALS)),)
