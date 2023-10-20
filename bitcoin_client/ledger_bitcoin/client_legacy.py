@@ -77,7 +77,7 @@ class LegacyClient(Client):
 
         self.app = btchip(DongleAdaptor(comm_client))
 
-        if self.app.getAppName() not in ["Syscoin", "Syscoin Legacy", "Syscoin Test", "Syscoin Test Legacy", "app"]:
+        if self.app.getAppName() not in ["Syscoin", "Syscoin Legacy", "Syscoin RegTest", "Syscoin RegTest Legacy", "app"]:
             raise ValueError("Ledger is not in either the Syscoin or Syscoin Testnet app")
 
     def get_extended_pubkey(self, path: str, display: bool = False) -> str:

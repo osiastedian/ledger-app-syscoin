@@ -26,7 +26,7 @@ async fn test_get_version() {
             .get_version()
             .unwrap();
 
-    assert_eq!(name, "Syscoin Test".to_string());
+    assert_eq!(name, "Syscoin RegTest".to_string());
     assert_eq!(version, "2.1.0".to_string());
     assert_eq!(flags, vec![0x00]);
 
@@ -36,7 +36,7 @@ async fn test_get_version() {
             .await
             .unwrap();
 
-    assert_eq!(name, "Syscoin Test".to_string());
+    assert_eq!(name, "Syscoin RegTest".to_string());
     assert_eq!(version, "2.1.0".to_string());
     assert_eq!(flags, vec![0x00]);
 }

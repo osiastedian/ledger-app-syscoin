@@ -65,7 +65,7 @@ DEFINES   += COIN_P2SH_VERSION=196
 DEFINES   += COIN_NATIVE_SEGWIT_PREFIX=\"tb\"
 DEFINES   += COIN_COINID_SHORT=\"TEST\"
 
-APPNAME = "Syscoin Test"
+APPNAME = "Syscoin RegTest"
 
 else ifeq ($(COIN),syscoin)
 

@@ -17,7 +17,7 @@ random.seed(0)  # make sure tests are repeatable
 
 # Make sure that the native client library is used with, as speculos would otherwise
 # return a version number < 2.0.0 for the app
-os.environ['SPECULOS_APPNAME'] = f'Syscoin Test:{get_app_version()}'
+os.environ['SPECULOS_APPNAME'] = f'Syscoin RegTest:{get_app_version()}'
 
 
 BITCOIN_DIRNAME = os.getenv("SYSCOIN_DATA", ".test_syscoin")
