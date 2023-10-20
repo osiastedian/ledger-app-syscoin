@@ -174,6 +174,9 @@ export const setupLedgerApi = (window: BrowserWindow) => {
             .getWalletAddress(walletPolicy, null, change, addressIndex, false)
             .then((addresss) => {
               window.webContents.send("message", method, addresss);
+            })
+            .catch((e) => {
+              console.error("getAddress error", e);
             });
         }
         break;

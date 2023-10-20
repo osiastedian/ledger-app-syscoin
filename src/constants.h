@@ -1,5 +1,8 @@
 #pragma once
 
+#define BIP32_PUBKEY_VERSION_MAINNET 0x0488B21E
+#define BIP32_PUBKEY_VERSION_TESTNET 0x043587CF
+
 /**
  * Instruction class of the Bitcoin application.
  */
