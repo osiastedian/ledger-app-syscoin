@@ -295,6 +295,6 @@ def createClient(comm_client: Optional[TransportClient] = None, chain: Chain = C
     version = parse_version(app_version)
 
     # Use the legacy client if either:
-    # - the name of the app is "Syscoin Legacy" or "Syscoin RegTest Legacy" (regardless of the version)
+    # - the name of the app is "Syscoin Legacy" or "Syscoin Regtest Legacy" (regardless of the version)
     # - the version is strictly less than 2.1
     return NewClient(comm_client, chain, debug);

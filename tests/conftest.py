@@ -17,7 +17,7 @@ random.seed(0)  # make sure tests are repeatable
 
 # Make sure that the native client library is used with, as speculos would otherwise
 # return a version number < 2.0.0 for the app
-os.environ['SPECULOS_APPNAME'] = f'Syscoin RegTest:{get_app_version()}'
+os.environ['SPECULOS_APPNAME'] = f'Syscoin Regtest:{get_app_version()}'
 
 
 BITCOIN_DIRNAME = os.getenv("SYSCOIN_DATA", ".test_syscoin")
@@ -27,7 +27,7 @@ rpc_url = "http://%s:%s@%s:%s" % (
     os.getenv("BTC_RPC_USER", "user"),
     os.getenv("BTC_RPC_PASSWORD", "passwd"),
     os.getenv("BTC_RPC_HOST", "127.0.0.1"),
-    os.getenv("BTC_RPC_PORT", "38370") # Syscoin RegTest Port
+    os.getenv("BTC_RPC_PORT", "38370") # Syscoin Regtest Port
 )
 
 utxos = list()
