@@ -41,7 +41,7 @@ APP_STACK_SIZE = 3072
 # Setting to allow building variant applications
 VARIANT_PARAM = COIN
 VARIANT_VALUES = syscoin_test syscoin
-COIN=syscoin
+# COIN=syscoin
 # simplify for tests
 ifndef COIN
 COIN=syscoin_test
