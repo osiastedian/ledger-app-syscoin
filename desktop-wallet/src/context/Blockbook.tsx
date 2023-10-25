@@ -45,7 +45,8 @@ const BlockbookContext = createContext({} as IBlockbookContext);
 
 export const useBlockbook = () => useContext(BlockbookContext);
 
-const path = `m/84'/57'/0'`;
+const script = "tr";
+const path = `m/86'/57'/0'`;
 
 type BlockbookProviderProps = {
   children: React.ReactNode;
@@ -57,7 +58,7 @@ export const BlockbookProvider: React.FC<BlockbookProviderProps> = ({
   const { fingerprint } = useFingerprint();
   const { query } = useTransport();
   const getDescriptor = (xpub: string) => {
-    return `wpkh([${path.replace("m", fingerprint)}]${xpub})`;
+    return `${script}([${path.replace("m", fingerprint)}]${xpub})`;
   };
   const xpub = useQuery(["xpub", path], {
     queryFn: async () => {
@@ -104,7 +105,7 @@ export const BlockbookProvider: React.FC<BlockbookProviderProps> = ({
       fingerprint,
       xpub.data,
       path,
-      "wpkh(@0/**)",
+      `${script}(@0/**)`,
       toAddress,
       amount,
       utxos.data
