@@ -66,7 +66,7 @@ DEFINES   += COIN_NATIVE_SEGWIT_PREFIX=\"tb\"
 DEFINES   += COIN_COINID_SHORT=\"TEST\"
 
 APPNAME = "Syscoin Test"
-PATH_APP_LOAD_PARAMS = "0'/1'" "44'/1'" "45'/1'" "84'/1'" "86'/1'"
+PATH_APP_LOAD_PARAMS = "0'/1'" "44'/1'" "45'/1'" "84'/1'" "86'/1'" "48'/1'" "49'/1'"
 
 else ifeq ($(COIN),syscoin)
 
