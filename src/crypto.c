@@ -269,12 +269,12 @@ uint32_t crypto_get_key_fingerprint(const uint8_t pub_key[static 33]) {
 void crypto_get_master_fingerprint_path(bip32_path_t *path) {
     path->length = 0;
     if (BIP32_PUBKEY_VERSION == BIP32_PUBKEY_VERSION_MAINNET) {  // mainnet
-        // Mainnet fingerprint bip32 path m/44'/88' in HWI
+        // Mainnet fingerprint bip32 path m/44'/57' in HWI
         path->path[0] = 0x8000002c;
         path->path[1] = 0x80000039;
         path->length = 2;
     } else if (BIP32_PUBKEY_VERSION == BIP32_PUBKEY_VERSION_TESTNET) {  // testnet
-        // Testnet fingerprint bip32 path m/0'/45342' in HWI
+        // Testnet fingerprint bip32 path m/0'/1' in HWI
         path->path[0] = 0x80000000;
         path->path[1] = 0x80000001;
         path->length = 2;
