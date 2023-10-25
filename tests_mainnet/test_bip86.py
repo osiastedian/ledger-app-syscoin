@@ -13,17 +13,11 @@ def test_bip86(client: Client, speculos_globals: SpeculosGlobals):
 
     # test for a native taproot wallet (bech32m addresses, per BIP-0086)
 
-    xpub = client.get_extended_pubkey("m/86'/57'/0'", False)
-
-    key_info = f"[{fpr}/86'/57'/0']{xpub}"
-
-    print(key_info)
-
     wallet = WalletPolicy(
         name="",
         descriptor_template="tr(@0/**)",
         keys_info=[
-            key_info
+            f"[{fpr}/86'/57'/0']xpub6CXaPZmr2vSHZwkubMWbGMhV2512eXPaEPnYLyfuJou6QU6pk1w5WsEPCkqTNJRNATxZ3eHT2xtm3Y3VkbvbSxu3rasjdTNv3twG2Yvvv6W"
         ],
     )
 
