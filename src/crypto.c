@@ -275,7 +275,7 @@ void crypto_get_master_fingerprint_path(bip32_path_t *path) {
         path->length = 2;
     } else if (BIP32_PUBKEY_VERSION == BIP32_PUBKEY_VERSION_TESTNET) {  // testnet
         // Testnet fingerprint bip32 path m/0'/1' in HWI
-        path->path[0] = 0x80000000;
+        path->path[0] = 0x8000002c;
         path->path[1] = 0x80000001;
         path->length = 2;
     }
