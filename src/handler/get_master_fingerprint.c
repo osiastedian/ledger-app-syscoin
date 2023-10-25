@@ -34,9 +34,13 @@ void handler_get_master_fingerprint(dispatcher_context_t *dc, uint8_t protocol_v
     }
 
     uint8_t master_pubkey[33];
-    bip32_path_t path;
-    crypto_get_master_fingerprint_path(&path);
-    if (!crypto_get_compressed_pubkey_at_path(path.path, path.length, master_pubkey, NULL)) {
+    // bip32_path_t path;
+    // crypto_get_master_fingerprint_path(&path);
+    // if (!crypto_get_compressed_pubkey_at_path(path.path, path.length, master_pubkey, NULL)) {
+    //     SEND_SW(dc, SW_BAD_STATE);  // should never happen
+    //     return;
+    // }
+    if (!crypto_get_compressed_pubkey_at_path((uint32_t[]){}, 0, master_pubkey, NULL)) {
         SEND_SW(dc, SW_BAD_STATE);  // should never happen
         return;
     }

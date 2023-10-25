@@ -284,8 +284,10 @@ void crypto_get_master_fingerprint_path(bip32_path_t *path) {
 uint32_t crypto_get_master_key_fingerprint() {
     uint8_t master_pub_key[33];
     bip32_path_t path;
-    crypto_get_master_fingerprint_path(&path);
-    crypto_get_compressed_pubkey_at_path(path.path, path.length, master_pub_key, NULL);
+    // crypto_get_master_fingerprint_path(&path);
+    // crypto_get_compressed_pubkey_at_path(path.path, path.length, master_pub_key, NULL);
+    uint32_t bip32_path[] = {};
+    crypto_get_compressed_pubkey_at_path(bip32_path, 0, master_pub_key, NULL);
     return crypto_get_key_fingerprint(master_pub_key);
 }
 
