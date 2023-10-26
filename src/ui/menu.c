@@ -21,6 +21,8 @@
 #include "../globals.h"
 #include "menu.h"
 
+#define BIP32_PUBKEY_VERSION_MAINNET 0x0488B21E
+#define BIP32_PUBKEY_VERSION_TESTNET 0x043587CF
 
 void ui_menu_main() {
     if (BIP32_PUBKEY_VERSION == BIP32_PUBKEY_VERSION_MAINNET) {  // mainnet
