@@ -246,14 +246,6 @@ bool crypto_get_compressed_pubkey_at_path(const uint32_t bip32_path[],
 uint32_t crypto_get_key_fingerprint(const uint8_t pub_key[static 33]);
 
 /**
- * Computes the master fingerprint path as per BIP32.
- *
- * @param[out]  path
- *   Master fingerprint path.
- */
-void crypto_get_master_fingerprint_path(bip32_path_t *path);
-
-/**
  * Computes the fingerprint of the master key as per BIP32.
  *
  * @return the fingerprint of the master key.
