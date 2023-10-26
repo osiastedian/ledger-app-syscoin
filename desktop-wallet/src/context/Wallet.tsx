@@ -21,7 +21,7 @@ interface IWalletContext {
 
 const WalletContext = createContext<IWalletContext>({} as IWalletContext);
 
-const descriptor = `tr(@0/**)`;
+const descriptor = `wpkh(@0/**)`;
 
 export const useWallet = () => useContext(WalletContext);
 

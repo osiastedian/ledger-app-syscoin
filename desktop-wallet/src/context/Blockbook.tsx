@@ -45,8 +45,8 @@ const BlockbookContext = createContext({} as IBlockbookContext);
 
 export const useBlockbook = () => useContext(BlockbookContext);
 
-const script = "tr";
-const path = `m/86'/57'/0'`;
+const script = "wpkh";
+const path = `m/84'/57'/0'`;
 
 type BlockbookProviderProps = {
   children: React.ReactNode;
