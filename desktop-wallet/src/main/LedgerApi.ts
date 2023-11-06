@@ -169,11 +169,15 @@ export const setupLedgerApi = (window: BrowserWindow) => {
           const [fingerprint, xpub, path, descriptor, change, addressIndex] =
             params;
           const policy = `[${path}]${xpub}`.replace("m", fingerprint);
+          console.log(params, policy);
           const walletPolicy = new DefaultWalletPolicy(descriptor, policy);
           appClient
             .getWalletAddress(walletPolicy, null, change, addressIndex, false)
             .then((addresss) => {
               window.webContents.send("message", method, addresss);
+            })
+            .catch((e) => {
+              console.error("getAddress error", e);
             });
         }
         break;

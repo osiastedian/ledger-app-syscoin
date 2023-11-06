@@ -23,9 +23,6 @@ def test_dashboard(comm: SpeculosClient, is_speculos: bool, app_version: str, mo
     comm.wait_for_text_event("Quit")
 
     comm.press_and_release("right")
-    if(model != 'nanos'):
-        comm.wait_for_text_event("yscoin")
-    else:
-        comm.wait_for_text_event("Syscoin")
-    
+    comm.wait_for_text_event("Syscoin")
+
     comm.wait_for_text_event("is ready")

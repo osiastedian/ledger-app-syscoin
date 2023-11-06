@@ -1,5 +1,5 @@
 {
-  "name": "ledger-bitcoin",
+  "name": "ledger-syscoin",
   "version": "0.0.2",
   "description": "Ledger Hardware Wallet Syscoin Application Client",
   "main": "build/main/index.js",

@@ -27,7 +27,7 @@ rpc_url = "http://%s:%s@%s:%s" % (
     os.getenv("BTC_RPC_USER", "user"),
     os.getenv("BTC_RPC_PASSWORD", "passwd"),
     os.getenv("BTC_RPC_HOST", "127.0.0.1"),
-    os.getenv("BTC_RPC_PORT", "38370") # Syscoin RegTest Port
+    os.getenv("BTC_RPC_PORT", "38370") # Syscoin Test Port
 )
 
 utxos = list()

@@ -1,4 +1,4 @@
-# Bitcoin application: Technical Specifications
+# Syscoin application: Technical Specifications
 
 This page details the protocol implemented since version 2.1.0 of the app.
 
@@ -19,7 +19,7 @@ The main commands use `CLA = 0xE1`, unlike the legacy Bitcoin application that u
 |  E1 |  03 | GET_WALLET_ADDRESS     | Return and show on screen an address for a registered or default wallet |
 |  E1 |  04 | SIGN_PSBT              | Sign a PSBT with a registered or default wallet |
 |  E1 |  05 | GET_MASTER_FINGERPRINT | Return the fingerprint of the master public key |
-|  E1 |  10 | SIGN_MESSAGE           | Sign a message with a key from a BIP32 path (Bitcoin Message Signing) |
+|  E1 |  10 | SIGN_MESSAGE           | Sign a message with a key from a BIP32 path (Syscoin Message Signing) |
 
 The `CLA = 0xF8` is used for framework-specific (rather than app-specific) APDUs; at this time, only one command is present.
 
@@ -37,7 +37,7 @@ The specs for the client commands are detailed below.
 
 ## Descriptors and wallet policies
 
-The Bitcoin app uses a language similar to [output script descriptors](https://github.com/bitcoin/bitcoin/blob/master/doc/descriptors.md) in order to represent the wallets that can be used to sign transactions.
+The Syscoin app uses a language similar to [output script descriptors](https://github.com/bitcoin/bitcoin/blob/master/doc/descriptors.md) in order to represent the wallets that can be used to sign transactions.
 Wallet policies need to be registered on the device, with an interactive process that requires user's approval.
 
 See [here](wallet.md) for detailed information on the wallet policy language.
@@ -282,7 +282,7 @@ User interaction is not required for this command.
 
 ### SIGN_MESSAGE
 
-Signs a message, according to the standard Bitcoin Message Signing.
+Signs a message, according to the standard Syscoin Message Signing.
 
 The device shows on its secure screen the BIP-32 path used for signing, and the SHA256 hash of the message; the hash should be verified by the user using an external tool if the client is untrusted.
 
@@ -314,7 +314,7 @@ The theoretical maximum valid length of the message is 2<sup>32</sup>-1 = 4&nbsp
 
 | Length | Description |
 |--------|-------------|
-| `65`   | The returned signature, encoded in the standard Bitcoin message signing format |
+| `65`   | The returned signature, encoded in the standard Syscoin message signing format |
 
 The signature is returned as a 65-byte binary string (1 byte equal to 32 or 33, followed by `r` and `s`, each of them represented as a 32-byte big-endian integer).
 
@@ -322,8 +322,8 @@ The signature is returned as a 65-byte binary string (1 byte equal to 32 or 33, 
 
 The digest being signed is the double-SHA256 of the message, after prefixing the message with:
 
-- the magic string `"\x18Bitcoin Signed Message:\n"` (equal to `18426974636f696e205369676e6564204d6573736167653a0a` in hexadecimal)
-- the length of the message, encoded as a Bitcoin-style variable length integer.
+- the magic string `"\x18Syscoin Signed Message:\n"` (equal to `18426974636f696e205369676e6564204d6573736167653a0a` in hexadecimal)
+- the length of the message, encoded as a Syscoin-style variable length integer.
 
 #### Client commands
 

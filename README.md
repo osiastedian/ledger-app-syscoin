@@ -1,4 +1,4 @@
-# Ledger Bitcoin Application
+# Ledger Syscoin Application
 
 ## Prerequisite
 
@@ -26,7 +26,7 @@ make load     # load the app on the Nano using ledgerblue
 ## Documentation
 
 High level documentation on the architecture and interface of the app:
-- [bitcoin.md](doc/bitcoin.md): specifications of application commands.
+- [syscoin.md](doc/syscoin.md): specifications of application commands.
 - [wallet.md](doc/wallet.md): supported wallet signing policies.
 - [merkle.md](doc/merkle.md): rationale and specifications for the usage of Merkle trees.
 

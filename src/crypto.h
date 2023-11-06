@@ -11,6 +11,7 @@
 #include "./common/bip32.h"
 #include "./common/varint.h"
 #include "./common/write.h"
+#include "./swap/bip32_path.h"
 
 /**
  * A serialized extended pubkey according to BIP32 specifications.
@@ -243,6 +244,14 @@ bool crypto_get_compressed_pubkey_at_path(const uint32_t bip32_path[],
  * @return the fingerprint of pub_key.
  */
 uint32_t crypto_get_key_fingerprint(const uint8_t pub_key[static 33]);
+
+/**
+ * Computes the master fingerprint path as per BIP32.
+ *
+ * @param[out]  path
+ *   Master fingerprint path.
+ */
+void crypto_get_master_fingerprint_path(bip32_path_t *path);
 
 /**
  * Computes the fingerprint of the master key as per BIP32.
