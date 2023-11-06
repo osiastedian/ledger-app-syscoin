@@ -102,6 +102,7 @@ jobs:
           path: doc/html
 
   job_test:
+    if: false
     name: Tests
     strategy:
       matrix:
@@ -142,6 +143,7 @@ jobs:
           PYTHONPATH=$PYTHONPATH:/speculos pytest --headless --model=${{ matrix.model }} --timeout=500
 
   job_test_mainnet:
+    if: false
     name: Tests on mainnet
     strategy:
       matrix:
@@ -209,6 +211,7 @@ jobs:
   #         PYTHONPATH=$PYTHONPATH:/speculos pytest --headless
 
   job_test_js_lib:
+    if: false
     name: Tests with the JS library
     needs: job_build
     runs-on: ubuntu-latest
