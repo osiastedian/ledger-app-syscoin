@@ -301,14 +301,9 @@ export const setupLedgerApi = (window: BrowserWindow) => {
                       console.log("Sign psbt resp", { entries });
 
                       entries.forEach((entry, i) => {
-                        const [index, pubkeySign, signature] = entry;
+                        const [index, partialSig] = entry;
                         bitcoinPsbt.updateInput(index, {
-                          partialSig: [
-                            {
-                              pubkey: pubkeySign,
-                              signature: signature,
-                            },
-                          ],
+                          partialSig: [partialSig],
                         });
                       });
 
