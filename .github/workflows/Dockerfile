@@ -1,4 +1,5 @@
 # An image derived from ledgerhq/speculos but also containing the bitcoin-core binaries
+# compiled from the master branch
 
 FROM ghcr.io/ledgerhq/speculos:latest
 
