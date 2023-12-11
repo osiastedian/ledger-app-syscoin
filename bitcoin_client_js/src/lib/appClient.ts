@@ -424,7 +424,17 @@ export class AppClient {
     if (appAndVer.name === 'Syscoin Test') {
       network = networks.testnet;
     } else if (appAndVer.name === 'Syscoin') {
-      network = networks.bitcoin;
+      network = {
+        messagePrefix: '\x18Syscoin Signed Message:\n',
+        bech32: 'sys',
+        bip32: {
+          public: 0x0488b21e,
+          private: 0x0488ade4,
+        },
+        pubKeyHash: 0x3f,
+        scriptHash: 0x05,
+        wif: 0x80,
+      };
     } else {
       throw new Error(
         `Invalid network: ${appAndVer.name}. Expected 'Syscoin Test' or 'Syscoin'.`
